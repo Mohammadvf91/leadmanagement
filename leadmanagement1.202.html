@@ -1,0 +1,2158 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>پیگیر | مدیریت لید و تسک</title>
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css">
+<style>
+:root{
+  --bg:#F2F4F8; --surface:#FFFFFF; --surface-2:#F8F9FC; --border:#E1E5EE;
+  --text:#1B2233; --text-muted:#6B7488; --text-faint:#98A1B3;
+  --primary:#2E3A6E; --primary-dark:#212A54; --primary-light:#E6E9F5;
+  --heevaa:#0E7C7A; --heevaa-bg:#E1F3F1;
+  --finno:#9C7A22; --finno-bg:#F6EFDC;
+  --dejano:#6C3E78; --dejano-bg:#F1E5F2;
+  --general:#4E586B; --general-bg:#E9ECF2;
+  --danger:#C13F45; --danger-bg:#FBE8E8;
+  --warning:#B9852E; --warning-bg:#FBF0DC;
+  --success:#2C8A57; --success-bg:#E2F4E9;
+  --radius:10px; --radius-sm:7px;
+  --shadow-sm:0 1px 2px rgba(20,26,46,.06);
+  --shadow-md:0 4px 16px rgba(20,26,46,.10);
+  --shadow-lg:0 12px 40px rgba(20,26,46,.18);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:'Vazirmatn',Tahoma,sans-serif;background:var(--bg);color:var(--text);
+  font-size:14.5px;line-height:1.7;-webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit;}
+button{cursor:pointer;}
+::selection{background:var(--primary-light);}
+.hidden{display:none !important;}
+a{color:inherit;}
+
+/* ---------- layout ---------- */
+#app{display:flex;min-height:100vh;}
+.sidebar{
+  width:230px;flex:0 0 230px;background:var(--primary-dark);color:#fff;
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;
+}
+.sidebar .brand{padding:22px 20px 16px;border-bottom:1px solid rgba(255,255,255,.1);}
+.sidebar .brand .logo{font-size:19px;font-weight:700;letter-spacing:.2px;}
+.sidebar .brand .sub{font-size:12px;color:rgba(255,255,255,.55);margin-top:3px;}
+.sidebar nav{flex:1;padding:14px 10px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);
+  color:rgba(255,255,255,.72);font-size:14px;cursor:pointer;margin-bottom:2px;transition:background .12s;
+}
+.nav-item svg{flex:0 0 18px;width:18px;height:18px;opacity:.85;}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#fff;}
+.nav-item.active{background:rgba(255,255,255,.13);color:#fff;font-weight:600;}
+.nav-item .count{
+  margin-inline-start:auto;background:rgba(255,255,255,.14);border-radius:20px;padding:1px 8px;font-size:11.5px;
+}
+.nav-item.active .count{background:#fff;color:var(--primary-dark);}
+.sidebar .foot{padding:14px 18px;font-size:11.5px;color:rgba(255,255,255,.4);border-top:1px solid rgba(255,255,255,.1);}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{
+  position:sticky;top:0;z-index:20;background:rgba(242,244,248,.9);backdrop-filter:blur(6px);
+  display:flex;align-items:center;gap:14px;padding:14px 26px;border-bottom:1px solid var(--border);
+}
+.topbar h1{font-size:19px;margin:0;font-weight:700;}
+.topbar .date-pill{
+  font-size:12.5px;color:var(--text-muted);background:var(--surface);border:1px solid var(--border);
+  padding:5px 12px;border-radius:20px;
+}
+.topbar .spacer{flex:1;}
+.icon-btn{
+  width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--surface);
+  display:flex;align-items:center;justify-content:center;position:relative;transition:.12s;
+}
+.icon-btn:hover{border-color:var(--primary);color:var(--primary);}
+.icon-btn svg{width:17px;height:17px;}
+.badge-dot{
+  position:absolute;top:-3px;left:-3px;background:var(--danger);color:#fff;border-radius:50%;
+  min-width:16px;height:16px;font-size:10px;display:flex;align-items:center;justify-content:center;padding:0 3px;
+  border:2px solid var(--bg);
+}
+.btn{
+  display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);background:var(--surface);
+  padding:9px 16px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:600;transition:.12s;white-space:nowrap;
+}
+.btn:hover{border-color:var(--primary);color:var(--primary);}
+.btn svg{width:15px;height:15px;}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:#fff;}
+.btn-primary:hover{background:var(--primary-dark);color:#fff;border-color:var(--primary-dark);}
+.btn-danger{color:var(--danger);}
+.btn-danger:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-bg);}
+.btn-ghost{border-color:transparent;background:transparent;}
+.btn-ghost:hover{background:var(--surface-2);border-color:var(--border);color:var(--text);}
+.btn-sm{padding:6px 11px;font-size:12.5px;}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+
+#view-root{padding:22px 26px 60px;flex:1;}
+
+/* dropdown */
+.dropdown{position:relative;}
+.dropdown-panel{
+  position:absolute;left:0;top:calc(100% + 8px);background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);box-shadow:var(--shadow-md);width:340px;max-height:420px;overflow:auto;z-index:50;
+}
+.dropdown-panel .dp-head{padding:12px 16px;font-weight:700;font-size:13.5px;border-bottom:1px solid var(--border);}
+.dropdown-panel .dp-item{padding:11px 16px;border-bottom:1px solid var(--border);font-size:13px;}
+.dropdown-panel .dp-item:last-child{border-bottom:none;}
+.dropdown-panel .dp-empty{padding:26px 16px;text-align:center;color:var(--text-faint);font-size:13px;}
+
+/* cards / grid */
+.grid{display:grid;gap:14px;}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-2{grid-template-columns:2fr 1fr;}
+@media(max-width:1050px){.grid-4{grid-template-columns:repeat(2,1fr);}.grid-2{grid-template-columns:1fr;}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
+.stat-card .num{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;}
+.stat-card .lbl{color:var(--text-muted);font-size:12.5px;margin-top:4px;}
+.stat-card.accent-heevaa{border-top:3px solid var(--heevaa);}
+.stat-card.accent-finno{border-top:3px solid var(--finno);}
+.stat-card.accent-dejano{border-top:3px solid var(--dejano);}
+.stat-card.accent-general{border-top:3px solid var(--text-faint);}
+
+.section-title{display:flex;align-items:center;gap:10px;margin:26px 0 12px;}
+.section-title h2{font-size:15.5px;margin:0;font-weight:700;}
+.section-title .sub{color:var(--text-faint);font-size:12.5px;}
+
+/* tags/badges */
+.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;}
+.tag-heevaa{background:var(--heevaa-bg);color:var(--heevaa);}
+.tag-finno{background:var(--finno-bg);color:var(--finno);}
+.tag-dejano{background:var(--dejano-bg);color:var(--dejano);}
+.tag-general{background:var(--general-bg);color:var(--general);}
+.tag-danger{background:var(--danger-bg);color:var(--danger);}
+.tag-warning{background:var(--warning-bg);color:var(--warning);}
+.tag-success{background:var(--success-bg);color:var(--success);}
+.tag-muted{background:var(--surface-2);color:var(--text-muted);}
+
+/* lists */
+.list{display:flex;flex-direction:column;gap:10px;}
+
+.empty-state{
+  text-align:center;padding:60px 20px;color:var(--text-muted);border:1.5px dashed var(--border);border-radius:var(--radius);
+}
+.empty-state .ic{width:44px;height:44px;margin:0 auto 14px;color:var(--text-faint);}
+.empty-state h3{margin:0 0 6px;color:var(--text);font-size:15px;}
+.empty-state p{margin:0 0 16px;font-size:13px;}
+
+/* filter bar */
+.filterbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+.filterbar select,.filterbar input[type=text]{
+  padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);min-width:130px;
+}
+.filterbar input[type=text]{min-width:220px;}
+.chip-group{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{
+  padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font-size:12.5px;font-weight:600;
+}
+.chip.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+
+/* forms */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-grid.full,.field.full{grid-column:1/-1;}
+.field label{display:block;font-size:12.5px;font-weight:700;margin-bottom:6px;color:var(--text-muted);}
+.field input[type=text],.field input[type=email],.field input[type=tel],.field input[type=time],
+.field select,.field textarea{
+  width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-2);
+}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--primary-light);border-color:var(--primary);background:#fff;}
+.field textarea{resize:vertical;min-height:70px;}
+.date-select-group{display:flex;gap:8px;}
+.date-select-group select{flex:1;}
+.checkbox-row{display:flex;gap:16px;flex-wrap:wrap;padding-top:4px;}
+.checkbox-item{display:flex;align-items:center;gap:6px;font-size:13px;}
+.hint{font-size:11.5px;color:var(--text-faint);margin-top:5px;}
+
+/* modal */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(20,24,40,.45);display:flex;align-items:flex-start;justify-content:center;
+  padding:40px 16px;z-index:100;overflow:auto;
+}
+.modal{
+  background:var(--surface);border-radius:14px;box-shadow:var(--shadow-lg);width:100%;max-width:640px;
+}
+.modal.modal-sm{max-width:420px;}
+.modal-head{display:flex;align-items:center;padding:18px 22px;border-bottom:1px solid var(--border);}
+.modal-head h3{margin:0;font-size:16px;font-weight:700;}
+.modal-body{padding:20px 22px;max-height:65vh;overflow:auto;}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid var(--border);}
+
+/* calendar */
+.cal-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.cal-head h2{font-size:16px;margin:0 0 0 4px;font-weight:700;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.cal-dow{text-align:center;font-size:12px;color:var(--text-faint);font-weight:700;padding-bottom:4px;}
+.cal-dow.fri{color:var(--danger);opacity:.75;}
+.cal-cell{
+  min-height:96px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);
+  padding:7px;display:flex;flex-direction:column;gap:4px;cursor:pointer;transition:.12s;position:relative;
+}
+.cal-cell:hover{border-color:var(--primary);box-shadow:var(--shadow-sm);}
+.cal-cell.other-month{background:var(--surface-2);opacity:.45;cursor:default;}
+.cal-cell.today{border-color:var(--primary);box-shadow:inset 0 0 0 1px var(--primary);}
+.cal-cell .dnum{font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text);}
+.cal-cell .dnum.fri{color:var(--danger);}
+.cal-cell .dnum.today-num{
+  display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;
+  background:var(--primary);color:#fff;border-radius:50%;
+}
+.cal-chips{display:flex;flex-direction:column;gap:3px;}
+.cal-task-chip{
+  display:block;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:10.8px;font-weight:600;padding:2px 6px;border-radius:5px;
+}
+.cal-task-chip.done-chip{opacity:.5;text-decoration:line-through;}
+.cal-more{font-size:10px;color:var(--text-faint);padding:0 2px;}
+.cal-count-badge{
+  position:absolute;top:6px;left:6px;background:var(--danger);color:#fff;font-size:10px;font-weight:700;
+  border-radius:50%;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px;
+}
+.cal-cell.today .cal-count-badge{background:var(--primary);}
+
+/* toast */
+#toast-wrap{position:fixed;bottom:20px;left:20px;z-index:200;display:flex;flex-direction:column;gap:8px;}
+.toast{
+  background:var(--primary-dark);color:#fff;padding:11px 18px;border-radius:var(--radius-sm);font-size:13px;
+  box-shadow:var(--shadow-md);animation:toastIn .18s ease;
+}
+.toast.error{background:var(--danger);}
+.toast.success{background:var(--success);}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* backup view */
+.backup-status{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:var(--radius-sm);background:var(--surface-2);border:1px solid var(--border);}
+.dot-live{width:9px;height:9px;border-radius:50%;background:var(--text-faint);flex:0 0 9px;}
+.dot-live.on{background:var(--success);box-shadow:0 0 0 3px var(--success-bg);}
+
+.lead-detail-head{display:flex;align-items:flex-start;gap:13px;margin-bottom:14px;}
+.avatar-circle{
+  width:40px;height:40px;border-radius:50%;background:var(--primary-light);color:var(--primary);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:0 0 40px;
+}
+
+/* ---------- compact tables (leads / tasks) ---------- */
+.lead-table,.task-table{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);overflow:hidden;}
+.lead-table-head,.lead-row{
+  display:grid;grid-template-columns:32px 1.7fr 1.3fr 1fr 1.1fr 60px;gap:10px;align-items:center;
+}
+.lead-table-head{padding:8px 14px;background:var(--surface-2);font-size:11px;font-weight:700;color:var(--text-muted);border-bottom:1px solid var(--border);}
+.lead-row{padding:9px 14px;border-bottom:1px solid var(--border);transition:background .1s;}
+.lead-row:last-child{border-bottom:none;}
+.lead-row:hover{background:var(--surface-2);}
+.avatar-sm{
+  width:26px;height:26px;border-radius:50%;background:var(--primary-light);color:var(--primary);flex:0 0 26px;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;
+}
+.l-name-cell{min-width:0;}
+.l-name{font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.l-company{font-size:11.5px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.l-prods{display:flex;gap:4px;flex-wrap:wrap;min-width:0;}
+.cell-muted{font-size:12px;color:var(--text-muted);}
+
+.task-table-head,.task-row{
+  display:grid;grid-template-columns:118px 1fr 72px 96px 60px;gap:10px;align-items:center;
+}
+.task-table-head{padding:8px 14px;background:var(--surface-2);font-size:11px;font-weight:700;color:var(--text-muted);border-bottom:1px solid var(--border);}
+.task-row{padding:8px 14px;border-bottom:1px solid var(--border);transition:background .1s;}
+.task-row:last-child{border-bottom:none;}
+.task-row:hover{background:var(--surface-2);}
+.task-row.done .t-title{text-decoration:line-through;color:var(--text-faint);}
+.t-main{min-width:0;cursor:pointer;}
+.t-title-line{display:flex;align-items:center;gap:7px;min-width:0;}
+.t-title{font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+.pdot{width:7px;height:7px;border-radius:50%;flex:0 0 7px;}
+.t-sub{font-size:11.5px;color:var(--text-muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.t-priority{font-size:12px;color:var(--text-muted);}
+.t-date{font-size:12px;font-weight:600;cursor:pointer;line-height:1.4;}
+.t-time{font-weight:400;color:var(--text-muted);font-size:11px;}
+.t-actions{display:flex;gap:3px;justify-content:flex-end;}
+.btn-xs{width:26px;height:26px;}
+.btn-xs svg{width:13px;height:13px;}
+
+.task-group-sep{
+  display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--surface-2);
+  font-size:11.5px;font-weight:700;color:var(--text-muted);border-bottom:1px solid var(--border);
+}
+.task-group-sep .dot{width:7px;height:7px;border-radius:50%;flex:0 0 7px;}
+.task-group-sep .cnt{background:var(--surface);border:1px solid var(--border);padding:0 8px;border-radius:20px;font-size:10.5px;font-weight:700;color:var(--text);}
+
+.status-select{
+  width:100%;border:none;border-radius:20px;padding:4px 8px;font-size:11px;font-weight:700;cursor:pointer;
+  appearance:none;-webkit-appearance:none;text-align:center;
+}
+.status-select.st-pending{background:var(--general-bg);color:var(--general);}
+.status-select.st-waiting_on_other{background:var(--warning-bg);color:var(--warning);}
+.status-select.st-meeting_needed{background:var(--dejano-bg);color:var(--dejano);}
+.status-select.st-done{background:var(--success-bg);color:var(--success);}
+
+.subtask-badge{
+  display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:var(--success);
+  background:var(--success-bg);border-radius:20px;padding:1px 7px;flex:0 0 auto;
+}
+.subtask-badge svg{width:10px;height:10px;}
+.subtask-list{border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;max-height:220px;overflow-y:auto;}
+.subtask-item{
+  display:flex;align-items:center;gap:9px;padding:8px 10px;border-bottom:1px solid var(--border);background:var(--surface);
+}
+.subtask-item:last-child{border-bottom:none;}
+.subtask-item.done{background:var(--surface-2);}
+.subtask-item.done .subtask-text{text-decoration:line-through;color:var(--text-faint);}
+.subtask-check{
+  width:19px;height:19px;border-radius:50%;border:2px solid var(--border);flex:0 0 19px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:.12s;
+}
+.subtask-check svg{width:11px;height:11px;}
+.subtask-check.checked{background:var(--success);border-color:var(--success);color:#fff;}
+.subtask-check:hover{border-color:var(--success);}
+.subtask-text{flex:1;min-width:0;font-size:13px;overflow-wrap:break-word;}
+.subtask-date{flex:0 0 auto;font-size:11px;color:var(--text-faint);white-space:nowrap;}
+.subtask-item.editing{background:var(--primary-light);}
+.subtask-edit-input{
+  flex:1;min-width:0;padding:5px 9px;border:1px solid var(--primary);border-radius:6px;font-size:13px;background:#fff;
+}
+
+/* global subtasks page table */
+.subtask-table{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);overflow:hidden;}
+.subtask-table-head,.subtask-row{display:grid;grid-template-columns:22px 32px 1fr 190px 90px 64px;gap:10px;align-items:center;}
+.subtask-table-head{padding:8px 14px;background:var(--surface-2);font-size:11px;font-weight:700;color:var(--text-muted);border-bottom:1px solid var(--border);}
+.subtask-row{padding:8px 14px;border-bottom:1px solid var(--border);transition:background .1s;}
+.subtask-row:last-child{border-bottom:none;}
+.subtask-row:hover{background:var(--surface-2);}
+.subtask-row.done .sg-text{text-decoration:line-through;color:var(--text-faint);}
+.sg-text{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.sg-parent{font-size:11.5px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;min-width:0;}
+.sg-parent:hover{color:var(--primary);text-decoration:underline;}
+.sg-date{font-size:11.5px;color:var(--text-faint);white-space:nowrap;}
+.sg-actions{display:flex;gap:3px;justify-content:flex-end;}
+.drag-handle{
+  cursor:grab;color:var(--text-faint);display:flex;align-items:center;justify-content:center;
+  touch-action:none;user-select:none;-webkit-user-select:none;
+}
+.drag-handle:hover{color:var(--text-muted);}
+.drag-handle:active{cursor:grabbing;}
+.drag-handle svg{width:14px;height:14px;}
+.hint-icon{display:inline-flex;flex:0 0 auto;}
+.hint-icon svg{width:13px;height:13px;}
+.subtask-row.dragging{
+  position:relative;z-index:60;background:var(--surface);opacity:.98;
+  box-shadow:0 14px 28px rgba(20,26,46,.20),0 2px 6px rgba(20,26,46,.10);
+  border-radius:var(--radius-sm);cursor:grabbing;
+}
+.sub-drag-indicator{
+  position:fixed;height:3px;border-radius:3px;background:var(--primary);z-index:200;
+  opacity:0;pointer-events:none;transition:top .1s ease,left .1s ease,width .1s ease,opacity .12s ease;
+  box-shadow:0 0 0 3px var(--primary-light);
+}
+
+@media(max-width:860px){
+  .lead-table-head,.task-table-head,.subtask-table-head{display:none;}
+  .lead-row{display:flex;flex-wrap:wrap;gap:6px 10px;padding:11px 14px;}
+  .lead-row .l-name-cell{flex:1 1 auto;min-width:120px;}
+  .lead-row .l-prods{flex-basis:100%;order:5;}
+  .lead-row .cell-muted{font-size:11.5px;}
+  .task-row{display:flex;flex-wrap:wrap;gap:6px 10px;padding:11px 14px;}
+  .task-row>div:nth-child(1){flex:0 0 118px;}
+  .t-main{flex:1 1 200px;}
+  .t-priority{flex:0 0 auto;}
+  .t-date{flex:0 0 auto;}
+  .t-actions{flex:0 0 auto;margin-inline-start:auto;}
+  .subtask-row{display:flex;flex-wrap:wrap;gap:6px 10px;padding:11px 14px;}
+  .drag-handle{flex:0 0 20px;}
+  .sg-text{flex:1 1 160px;}
+  .sg-parent{flex-basis:100%;order:5;}
+  .sg-actions{flex:0 0 auto;margin-inline-start:auto;}
+}
+.menu-btn{display:none;}
+@media(max-width:720px){
+  .sidebar{position:fixed;right:0;height:100vh;transform:translateX(100%);transition:.2s;z-index:150;}
+  .sidebar.open{transform:translateX(0);}
+  .menu-btn{display:flex;}
+  .form-grid{grid-template-columns:1fr;}
+  .grid-4,.grid-3{grid-template-columns:repeat(2,1fr);}
+  #view-root{padding:16px;}
+  .topbar{padding:12px 16px;}
+}
+@media(max-width:720px){
+  .sidebar.open::after{content:'';position:fixed;inset:0;z-index:-1;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo">پیگیر</div>
+      <div class="sub">مدیریت لید و تسک · توسعه کسب‌وکار</div>
+    </div>
+    <nav id="nav"></nav>
+    <div class="foot" id="sidebarFoot">—</div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="icon-btn menu-btn" id="menuBtn" onclick="document.getElementById('sidebar').classList.toggle('open')" title="منو">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <h1 id="pageTitle">داشبورد</h1>
+      <span class="date-pill" id="todayPill"></span>
+      <div class="spacer"></div>
+      <div class="dropdown">
+        <button class="icon-btn" id="bellBtn" onclick="toggleBell()" title="یادآوری‌ها">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="badge-dot hidden" id="bellCount">0</span>
+        </button>
+        <div class="dropdown-panel hidden" id="bellPanel"></div>
+      </div>
+      <button class="btn btn-primary" onclick="openTaskModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+        تسک جدید
+      </button>
+    </div>
+    <div id="view-root"></div>
+  </div>
+</div>
+
+<div id="modal-root"></div>
+<div id="modal-root-2"></div>
+<div id="toast-wrap"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* ======================================================================
+   JALALI CALENDAR UTILITIES  (public-domain algorithm, jalaali-js style)
+   ====================================================================== */
+function jdiv(a,b){return ~~(a/b);}
+function jmod(a,b){return a-~~(a/b)*b;}
+function jalCal(jy){
+  var breaks=[-61,9,38,199,426,686,756,818,1111,1181,1210,1635,2060,2097,2192,2262,2324,2394,2456,3178];
+  var bl=breaks.length,gy=jy+621,leapJ=-14,jp=breaks[0],jm,jump,leap,n,i;
+  for(i=1;i<bl;i+=1){jm=breaks[i];jump=jm-jp;if(jy<jm)break;leapJ=leapJ+jdiv(jump,33)*8+jdiv(jmod(jump,33),4);jp=jm;}
+  n=jy-jp;leapJ=leapJ+jdiv(n,33)*8+jdiv(jmod(n,33)+3,4);
+  if(jmod(jump,33)===4 && jump-n===4)leapJ+=1;
+  var leapG=jdiv(gy,4)-jdiv((jdiv(gy,100)+1)*3,4)-150;
+  var march=20+leapJ-leapG;
+  if(jump-n<6)n=n-jump+jdiv(jump,33)*33;
+  leap=jmod(jmod(n+1,33)-1,4);if(leap===-1)leap=4;
+  return{leap:leap,gy:gy,march:march};
+}
+function g2d(gy,gm,gd){
+  var d=jdiv((gy+jdiv(gm-8,6)+100100)*1461,4)+jdiv(153*jmod(gm+9,12)+2,5)+gd-34840408;
+  d=d-jdiv(jdiv(gy+100100+jdiv(gm-8,6),100)*3,4)+752;return d;
+}
+function j2d(jy,jm,jd){var r=jalCal(jy);return g2d(r.gy,3,r.march)+(jm-1)*31-jdiv(jm,7)*(jm-7)+jd-1;}
+function d2g(jdn){
+  var j=4*jdn+139361631;j=j+jdiv(jdiv(4*jdn+183187720,146097)*3,4)*4-3908;
+  var i=jdiv(jmod(j,1461),4)*5+308;var gd=jdiv(jmod(i,153),5)+1;var gm=jmod(jdiv(i,153),12)+1;
+  var gy=jdiv(j,1461)-100100+jdiv(8-gm,6);return{gy:gy,gm:gm,gd:gd};
+}
+function d2j(jdn){
+  var gy=d2g(jdn).gy,jy=gy-621,r=jalCal(jy),jdn1f=g2d(gy,3,r.march),jd,jm,k;
+  k=jdn-jdn1f;
+  if(k>=0){if(k<=185){jm=1+jdiv(k,31);jd=jmod(k,31)+1;return{jy:jy,jm:jm,jd:jd};}else{k-=186;}}
+  else{jy-=1;k+=179;if(r.leap===1)k+=1;}
+  jm=7+jdiv(k,30);jd=jmod(k,30)+1;return{jy:jy,jm:jm,jd:jd};
+}
+function toJalaali(gy,gm,gd){return d2j(g2d(gy,gm,gd));}
+function toGregorian(jy,jm,jd){return d2g(j2d(jy,jm,jd));}
+function isLeapJalali(jy){var back=d2j(j2d(jy,12,30));return back.jm===12 && back.jd===30;}
+function daysInJalaliMonth(jy,jm){if(jm<=6)return 31;if(jm<=11)return 30;return isLeapJalali(jy)?30:29;}
+
+var JMONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+var JWEEKDAYS=['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'];
+var JWEEKDAYS_SHORT=['ش','ی','د','س','چ','پ','ج'];
+
+function pad2(n){return (n<10?'0':'')+n;}
+function pd(str){ // to persian digits
+  var map={'0':'۰','1':'۱','2':'۲','3':'۳','4':'۴','5':'۵','6':'۶','7':'۷','8':'۸','9':'۹'};
+  return String(str).replace(/[0-9]/g,function(d){return map[d];});
+}
+function isoToday(){var d=new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
+function isoFromDate(d){return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
+function isoToJalali(iso){var p=iso.split('-').map(Number);return toJalaali(p[0],p[1],p[2]);}
+function jalaliToIso(jy,jm,jd){var g=toGregorian(jy,jm,jd);return g.gy+'-'+pad2(g.gm)+'-'+pad2(g.gd);}
+function fmtJalali(iso){if(!iso)return '—';var j=isoToJalali(iso);return pd(j.jy+'/'+pad2(j.jm)+'/'+pad2(j.jd));}
+function fmtJalaliLong(iso){if(!iso)return '—';var j=isoToJalali(iso);var g=iso.split('-').map(Number);
+  var dow=new Date(g[0],g[1]-1,g[2]).getDay();var pIdx=(dow+1)%7;
+  return JWEEKDAYS[pIdx]+' '+pd(j.jd)+' '+JMONTHS[j.jm-1]+' '+pd(j.jy);}
+function todayJalali(){return isoToJalali(isoToday());}
+function fmtJalaliEn(iso){if(!iso)return '';var j=isoToJalali(iso);return j.jy+'/'+pad2(j.jm)+'/'+pad2(j.jd);}
+function enDigits(s){
+  var map={'۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'};
+  return String(s==null?'':s).replace(/[۰-۹]/g,function(d){return map[d];});
+}
+function parseJalaliDateStr(s){
+  if(!s)return null;
+  var t=enDigits(s).trim();
+  var parts=t.split(/[\/\-]/).map(function(x){return parseInt(x,10);});
+  if(parts.length!==3||parts.some(isNaN))return null;
+  try{return jalaliToIso(parts[0],parts[1],parts[2]);}catch(e){return null;}
+}
+
+/* ======================================================================
+   ICONS
+   ====================================================================== */
+function icon(name){
+  var I={
+    dashboard:'<path d="M4 13h6V4H4v9zM14 20h6v-9h-6v9zM14 4v5h6V4h-6zM4 20h6v-5H4v5z"/>',
+    users:'<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.5 2.9-6 6.5-6s6.5 2.5 6.5 6"/><circle cx="17" cy="8.5" r="2.6"/><path d="M15.5 14.2c2.7.4 4.5 2.4 4.5 5.3"/>',
+    tasks:'<rect x="4" y="4" width="16" height="16" rx="2.5"/><path d="M8 10l2.2 2.2L16 7.5"/>',
+    calendar:'<rect x="3.5" y="5" width="17" height="16" rx="2.3"/><path d="M8 3v4M16 3v4M3.5 10h17"/>',
+    backup:'<path d="M12 3v12M12 15l4-4M12 15l-4-4"/><path d="M4 15v3.5A2.5 2.5 0 006.5 21h11a2.5 2.5 0 002.5-2.5V15"/>',
+    plus:'<path d="M12 5v14M5 12h14"/>',
+    edit:'<path d="M12.5 5.5l6 6L8 22H2v-6z"/><path d="M17 4l3 3"/>',
+    trash:'<path d="M4 7h16M9 7V4.8A1.8 1.8 0 0110.8 3h2.4A1.8 1.8 0 0115 4.8V7m2 0-1 13.2A2 2 0 0114 22h-4a2 2 0 01-2-1.8L7 7"/>',
+    check:'<path d="M4 12l5 5L20 6"/>',
+    x:'<path d="M18 6L6 18M6 6l12 12"/>',
+    download:'<path d="M12 3v13M12 16l-4.5-4.5M12 16l4.5-4.5"/><path d="M4 19h16"/>',
+    upload:'<path d="M12 21V8M12 8l-4.5 4.5M12 8l4.5 4.5"/><path d="M4 21h16"/>',
+    chevR:'<path d="M9 6l6 6-6 6"/>',
+    chevL:'<path d="M15 6l-6 6 6 6"/>',
+    search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>',
+    link:'<path d="M9 15l6-6"/><path d="M13.5 5.5l1-1a3.5 3.5 0 115 5l-2 2M10.5 18.5l-1 1a3.5 3.5 0 11-5-5l2-2"/>',
+    bell:'<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>',
+    dot:'<circle cx="12" cy="12" r="4"/>',
+    settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.34 1.9l.06.06a2 2 0 11-2.9 2.9l-.06-.06a1.7 1.7 0 00-1.9-.34 1.7 1.7 0 00-1 1.6V21a2 2 0 11-4 0v-.09a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.34l-.06.06a2 2 0 11-2.9-2.9l.06-.06a1.7 1.7 0 00.34-1.9 1.7 1.7 0 00-1.6-1H3a2 2 0 110-4h.09a1.7 1.7 0 001.6-1 1.7 1.7 0 00-.34-1.9l-.06-.06a2 2 0 112.9-2.9l.06.06a1.7 1.7 0 001.9.34H9a1.7 1.7 0 001-1.6V3a2 2 0 114 0v.09a1.7 1.7 0 001 1.6 1.7 1.7 0 001.9-.34l.06-.06a2 2 0 112.9 2.9l-.06.06a1.7 1.7 0 00-.34 1.9V9a1.7 1.7 0 001.6 1H21a2 2 0 110 4h-.09a1.7 1.7 0 00-1.6 1z"/>',
+    building:'<rect x="4" y="3" width="10" height="18" rx="1"/><path d="M14 8h6v13h-6M7 7h2M7 11h2M7 15h2"/>',
+    phone:'<path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.3 1.8.6 2.7a2 2 0 01-.5 2.1L8 9.7a16 16 0 006 6l1.2-1.2a2 2 0 012.1-.5c.9.3 1.8.5 2.7.6a2 2 0 011.7 2.1z"/>',
+    checklist:'<path d="M4 6.2l1.4 1.4L8 5"/><path d="M11 6h9"/><path d="M4 12.2l1.4 1.4L8 11"/><path d="M11 12h9"/><path d="M4 18.2l1.4 1.4L8 17"/><path d="M11 18h9"/>',
+    grip:'<circle cx="9" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="15" cy="18" r="1.4" fill="currentColor" stroke="none"/>'
+  };
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+(I[name]||I.dot)+'</svg>';
+}
+
+/* ======================================================================
+   DATA / STATE  (kept in memory only — persisted via user-selected backup
+   file using the File System Access API, or manual JSON export/import)
+   ====================================================================== */
+var PRODUCTS=[
+  {key:'heevaa',name:'هیوا',desc:'مدیریت API'},
+  {key:'finno',name:'فینو',desc:'مدیریت درآمد API'},
+  {key:'dejano',name:'دژانو',desc:'دسترسی امن اینترنت'}
+];
+var LEAD_STATUSES=['جدید','تماس اولیه','ارائه شده','در حال مذاکره','قرارداد (برنده)','بسته‌شده (بازنده)'];
+var LEAD_SOURCES=['معرفی','وبسایت','تماس سرد','نمایشگاه/رویداد','شبکه‌های اجتماعی','سایر'];
+var TASK_PRIORITIES=[{k:'کم',c:'muted'},{k:'متوسط',c:'warning'},{k:'بالا',c:'danger'},{k:'فوری',c:'danger'}];
+var TASK_STATUSES=[
+  {key:'pending',label:'در انتظار اقدام',short:'در انتظار',color:'muted'},
+  {key:'waiting_on_other',label:'منتظر پاسخ طرف مقابل',short:'منتظر پاسخ',color:'warning'},
+  {key:'meeting_needed',label:'نیازمند جلسه',short:'نیازمند جلسه',color:'dejano'},
+  {key:'done',label:'انجام‌شده',short:'انجام‌شده',color:'success'}
+];
+function statusMeta(key){return TASK_STATUSES.find(function(s){return s.key===key;})||TASK_STATUSES[0];}
+var REMINDER_OPTIONS=[
+  {v:0,l:'بدون یادآوری'},{v:15,l:'۱۵ دقیقه قبل'},{v:30,l:'۳۰ دقیقه قبل'},{v:60,l:'۱ ساعت قبل'},
+  {v:180,l:'۳ ساعت قبل'},{v:1440,l:'۱ روز قبل'},{v:2880,l:'۲ روز قبل'}
+];
+
+function uid(){return 'id_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+
+var state={leads:[],tasks:[],settings:{notifEnabled:false,defaultReminder:60},subtaskOrder:[]};
+
+/* ---------------- backup / persistence ---------------- */
+var backupHandle=null, backupFileName=null, lastBackupAt=null;
+var hasFSA = ('showSaveFilePicker' in window);
+
+async function verifyPermission(handle){
+  try{
+    if((await handle.queryPermission({mode:'readwrite'}))==='granted')return true;
+    if((await handle.requestPermission({mode:'readwrite'}))==='granted')return true;
+  }catch(e){}
+  return false;
+}
+async function writeBackupNow(){
+  if(!backupHandle)return;
+  try{
+    var ok=await verifyPermission(backupHandle);
+    if(!ok)return;
+    var writable=await backupHandle.createWritable();
+    await writable.write(JSON.stringify(state,null,2));
+    await writable.close();
+    lastBackupAt=new Date();
+    updateBackupStatusUI();
+  }catch(e){console.error('backup write failed',e);}
+}
+function persist(){ writeBackupNow(); saveSidebarFoot(); }
+
+async function createNewBackupFile(){
+  if(!hasFSA){toast('مرورگر شما از بکاپ خودکار پشتیبانی نمی‌کند؛ از دانلود دستی استفاده کنید.','error');return;}
+  try{
+    var handle=await window.showSaveFilePicker({suggestedName:'peygir-backup.json',types:[{description:'JSON', accept:{'application/json':['.json']}}]});
+    backupHandle=handle; backupFileName=handle.name;
+    await writeBackupNow();
+    toast('فایل بکاپ ایجاد شد. از این پس هر تغییری خودکار در آن ذخیره می‌شود.','success');
+    updateBackupStatusUI();
+  }catch(e){if(e.name!=='AbortError')toast('ایجاد فایل بکاپ ناموفق بود.','error');}
+}
+async function openExistingBackupFile(){
+  if(!hasFSA){toast('مرورگر شما از این قابلیت پشتیبانی نمی‌کند؛ از «بازیابی دستی» استفاده کنید.','error');return;}
+  try{
+    var handles=await window.showOpenFilePicker({types:[{description:'JSON', accept:{'application/json':['.json']}}],multiple:false});
+    var handle=handles[0];
+    var ok=await verifyPermission(handle);
+    if(!ok){toast('اجازه دسترسی به فایل داده نشد.','error');return;}
+    var file=await handle.getFile();
+    var text=await file.text();
+    var data=JSON.parse(text);
+    if(!data||!Array.isArray(data.leads)||!Array.isArray(data.tasks))throw new Error('invalid');
+    state=Object.assign({leads:[],tasks:[],settings:{notifEnabled:false,defaultReminder:60},subtaskOrder:[]},data);
+    backupHandle=handle; backupFileName=handle.name;
+    renderAll();
+    closeModal();
+    updateBackupStatusUI();
+    toast('اطلاعات بازیابی شد و بکاپ خودکار روی همین فایل فعال شد.','success');
+  }catch(e){if(e.name!=='AbortError')toast('فایل بکاپ نامعتبر است.','error');}
+}
+function exportManualBackup(){
+  var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='peygir-backup-'+isoToday()+'.json';document.body.appendChild(a);a.click();a.remove();
+  URL.revokeObjectURL(url);
+  toast('فایل بکاپ دانلود شد.','success');
+}
+function importManualBackup(input){
+  var file=input.files[0]; if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=JSON.parse(e.target.result);
+      if(!data||!Array.isArray(data.leads)||!Array.isArray(data.tasks))throw 0;
+      state=Object.assign({leads:[],tasks:[],settings:{notifEnabled:false,defaultReminder:60},subtaskOrder:[]},data);
+      renderAll();
+      toast('بازیابی با موفقیت انجام شد.','success');
+    }catch(err){toast('فایل انتخاب‌شده معتبر نیست.','error');}
+  };
+  reader.readAsText(file);
+  input.value='';
+}
+function updateBackupStatusUI(){
+  var el=document.getElementById('backupStatusBox');
+  if(el) renderBackupView();
+  saveSidebarFoot();
+}
+function saveSidebarFoot(){
+  var el=document.getElementById('sidebarFoot');
+  if(!el)return;
+  if(backupHandle){el.innerHTML='🔗 بکاپ خودکار: '+escapeHtml(backupFileName||'')+(lastBackupAt?'<br>آخرین ذخیره: '+pd(lastBackupAt.toLocaleTimeString('fa-IR'||undefined)):'');}
+  else{el.textContent='بکاپ خودکار غیرفعال است';}
+}
+
+/* ======================================================================
+   EXCEL EXPORT / IMPORT  (SheetJS)
+   ====================================================================== */
+function xlsxReady(){
+  if(typeof XLSX==='undefined'){toast('کتابخانهٔ اکسل هنوز بارگذاری نشده؛ چند لحظه صبر کنید و دوباره تلاش کنید.','error');return false;}
+  return true;
+}
+function exportLeadsExcel(){
+  if(!xlsxReady())return;
+  if(!state.leads.length){toast('لیدی برای خروجی گرفتن وجود ندارد.','error');return;}
+  var rows=state.leads.map(function(l){
+    return {
+      'نام':l.name||'',
+      'شرکت':l.company||'',
+      'تلفن':l.phone||'',
+      'ایمیل':l.email||'',
+      'محصولات':(l.products||[]).map(function(k){var p=PRODUCTS.find(function(x){return x.key===k;});return p?p.name:k;}).join('، '),
+      'وضعیت':l.status||'',
+      'منبع':l.source||'',
+      'یادداشت':l.notes||'',
+      'تاریخ ثبت':l.createdAt?fmtJalaliEn(isoFromDate(new Date(l.createdAt))):''
+    };
+  });
+  var ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=[{wch:18},{wch:20},{wch:14},{wch:22},{wch:22},{wch:16},{wch:16},{wch:34},{wch:12}];
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'لیدها');
+  XLSX.writeFile(wb,'leads-'+isoToday()+'.xlsx');
+  toast('فایل اکسل لیدها دانلود شد.','success');
+}
+function importLeadsExcel(input){
+  var file=input.files[0]; if(!file)return;
+  if(!xlsxReady()){input.value='';return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      var ws=wb.Sheets[wb.SheetNames[0]];
+      var rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      var added=0;
+      rows.forEach(function(r){
+        var name=String(r['نام']||r['Name']||'').trim();
+        if(!name)return;
+        var prodStr=String(r['محصولات']||r['Products']||'');
+        var products=PRODUCTS.filter(function(p){return prodStr.indexOf(p.name)>-1;}).map(function(p){return p.key;});
+        var status=String(r['وضعیت']||'').trim();
+        if(LEAD_STATUSES.indexOf(status)===-1)status=LEAD_STATUSES[0];
+        addLeadSilent({
+          name:name,
+          company:String(r['شرکت']||'').trim(),
+          phone:String(r['تلفن']||'').trim(),
+          email:String(r['ایمیل']||'').trim(),
+          products:products,
+          status:status,
+          source:String(r['منبع']||'').trim(),
+          notes:String(r['یادداشت']||'').trim()
+        });
+        added++;
+      });
+      persist(); renderCurrentSoft();
+      toast(added?pd(added)+' لید از فایل اکسل وارد شد.':'ردیف معتبری در فایل یافت نشد.', added?'success':'error');
+    }catch(err){console.error(err);toast('خواندن فایل اکسل ناموفق بود؛ قالب فایل را بررسی کنید.','error');}
+  };
+  reader.readAsArrayBuffer(file);
+  input.value='';
+}
+function exportTasksExcel(){
+  if(!xlsxReady())return;
+  if(!state.tasks.length){toast('تسکی برای خروجی گرفتن وجود ندارد.','error');return;}
+  var rows=state.tasks.map(function(t){
+    var lead=t.leadId?leadById(t.leadId):null;
+    var prod=PRODUCTS.find(function(p){return p.key===t.product;});
+    return {
+      'عنوان':t.title||'',
+      'لید':lead?lead.name:'',
+      'محصول': (!t.product||t.product==='general')?'عمومی':(prod?prod.name:t.product),
+      'اولویت':t.priority||'',
+      'وضعیت': statusMeta(t.status).label,
+      'تاریخ سررسید (شمسی)': fmtJalaliEn(t.dueDateISO),
+      'ساعت':t.dueTime||'',
+      'یادآوری (دقیقه قبل)':t.reminderMinutes||0,
+      'توضیحات':t.description||''
+    };
+  });
+  var ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=[{wch:28},{wch:18},{wch:14},{wch:10},{wch:18},{wch:16},{wch:8},{wch:14},{wch:34}];
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'تسک‌ها');
+  XLSX.writeFile(wb,'tasks-'+isoToday()+'.xlsx');
+  toast('فایل اکسل تسک‌ها دانلود شد.','success');
+}
+function importTasksExcel(input){
+  var file=input.files[0]; if(!file)return;
+  if(!xlsxReady()){input.value='';return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      var ws=wb.Sheets[wb.SheetNames[0]];
+      var rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      var added=0, skipped=0, unmatchedLead=0;
+      rows.forEach(function(r){
+        var title=String(r['عنوان']||r['Title']||'').trim();
+        if(!title){skipped++;return;}
+        var dueStr=r['تاریخ سررسید (شمسی)']||r['تاریخ سررسید']||'';
+        var dueIso=parseJalaliDateStr(dueStr);
+        if(!dueIso){skipped++;return;}
+        var leadName=String(r['لید']||'').trim();
+        var leadId=null;
+        if(leadName){
+          var found=state.leads.find(function(l){return l.name.trim()===leadName;});
+          if(found)leadId=found.id; else unmatchedLead++;
+        }
+        var prodStr=String(r['محصول']||'').trim();
+        var prodObj=PRODUCTS.find(function(p){return p.name===prodStr;});
+        var product=prodObj?prodObj.key:'general';
+        var priority=String(r['اولویت']||'').trim();
+        if(TASK_PRIORITIES.map(function(p){return p.k;}).indexOf(priority)===-1)priority='متوسط';
+        var statusLabel=String(r['وضعیت']||'').trim();
+        var statusObj=TASK_STATUSES.find(function(s){return s.label===statusLabel||s.short===statusLabel;});
+        var status=statusObj?statusObj.key:'pending';
+        var timeStr=String(r['ساعت']||'').trim();
+        var remin=parseInt(enDigits(r['یادآوری (دقیقه قبل)']||''),10);
+        if(isNaN(remin))remin=state.settings.defaultReminder;
+        addTaskSilent({
+          title:title, leadId:leadId, product:product, priority:priority, status:status,
+          dueDateISO:dueIso, dueTime:/^\d{1,2}:\d{2}$/.test(timeStr)?timeStr:'',
+          reminderMinutes:remin, description:String(r['توضیحات']||'').trim()
+        });
+        added++;
+      });
+      persist(); renderCurrentSoft(); renderBell();
+      var msg=(added?pd(added)+' تسک وارد شد.':'ردیف معتبری یافت نشد.');
+      if(skipped)msg+=' '+pd(skipped)+' ردیف نامعتبر رد شد.';
+      if(unmatchedLead)msg+=' '+pd(unmatchedLead)+' مورد بدون تطبیق لید.';
+      toast(msg, added?'success':'error');
+    }catch(err){console.error(err);toast('خواندن فایل اکسل ناموفق بود؛ قالب فایل را بررسی کنید.','error');}
+  };
+  reader.readAsArrayBuffer(file);
+  input.value='';
+}
+
+function exportSubtasksExcel(){
+  if(!xlsxReady())return;
+  var flat=getAllSubtasksFlat();
+  if(!flat.length){toast('ریزکاری برای خروجی گرفتن وجود ندارد.','error');return;}
+  ensureSubtaskOrderConsistent();
+  var orderIndex={};
+  state.subtaskOrder.forEach(function(id,i){orderIndex[id]=i;});
+  var sorted=flat.slice().sort(function(a,b){
+    var ai=orderIndex.hasOwnProperty(a.sub.id)?orderIndex[a.sub.id]:Infinity;
+    var bi=orderIndex.hasOwnProperty(b.sub.id)?orderIndex[b.sub.id]:Infinity;
+    return ai-bi;
+  });
+  var rows=sorted.map(function(item){
+    var t=item.task, s=item.sub;
+    var lead=t.leadId?leadById(t.leadId):null;
+    return {
+      'متن':s.text||'',
+      'مربوط به تسک':t.title||'',
+      'لید':lead?lead.name:'',
+      'وضعیت': s.done?'انجام‌شده':'انجام‌نشده',
+      'تاریخ ثبت (شمسی)': fmtJalaliEn(isoFromDate(new Date(s.createdAt)))
+    };
+  });
+  var ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=[{wch:40},{wch:26},{wch:18},{wch:14},{wch:16}];
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'ریزکارها');
+  XLSX.writeFile(wb,'subtasks-'+isoToday()+'.xlsx');
+  toast('فایل اکسل ریزکارها دانلود شد.','success');
+}
+function importSubtasksExcel(input){
+  var file=input.files[0]; if(!file)return;
+  if(!xlsxReady()){input.value='';return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      var ws=wb.Sheets[wb.SheetNames[0]];
+      var rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      var added=0, skipped=0, unmatchedTask=0;
+      rows.forEach(function(r){
+        var text=String(r['متن']||r['Text']||'').trim();
+        if(!text){skipped++;return;}
+        var taskTitle=String(r['مربوط به تسک']||r['تسک']||'').trim();
+        if(!taskTitle){unmatchedTask++;return;}
+        var t=state.tasks.find(function(x){return (x.title||'').trim()===taskTitle;});
+        if(!t){unmatchedTask++;return;}
+        var statusStr=String(r['وضعیت']||'').trim();
+        var done = statusStr==='انجام‌شده' || statusStr==='انجام شده' || statusStr.toLowerCase()==='done';
+        var createdStr=r['تاریخ ثبت (شمسی)']||r['تاریخ ثبت']||'';
+        var createdIso=parseJalaliDateStr(createdStr);
+        var createdAt = createdIso ? new Date(createdIso+'T09:00:00').toISOString() : new Date().toISOString();
+        if(!Array.isArray(t.subtasks))t.subtasks=[];
+        t.subtasks.push({id:uid(), text:text, done:done, createdAt:createdAt});
+        added++;
+      });
+      persist(); renderCurrentSoft();
+      var msg=(added?pd(added)+' ریزکار وارد شد.':'ردیف معتبری یافت نشد.');
+      if(skipped)msg+=' '+pd(skipped)+' ردیف بدون متن رد شد.';
+      if(unmatchedTask)msg+=' '+pd(unmatchedTask)+' مورد بدون تطبیق تسک (نام تسک باید دقیقاً یکسان باشد).';
+      toast(msg, added?'success':'error');
+    }catch(err){console.error(err);toast('خواندن فایل اکسل ناموفق بود؛ قالب فایل را بررسی کنید.','error');}
+  };
+  reader.readAsArrayBuffer(file);
+  input.value='';
+}
+
+/* ======================================================================
+   TOASTS
+   ====================================================================== */
+function toast(msg,type){
+  var wrap=document.getElementById('toast-wrap');
+  var t=document.createElement('div');
+  t.className='toast'+(type?' '+type:'');
+  t.textContent=msg;
+  wrap.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .25s';setTimeout(function(){t.remove();},250);},3200);
+}
+function escapeHtml(s){return (s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+/* ======================================================================
+   PRODUCT / STATUS HELPERS
+   ====================================================================== */
+function productTag(key){
+  if(!key||key==='general')return '<span class="tag tag-general">'+icon('dot')+' عمومی</span>';
+  var p=PRODUCTS.find(function(x){return x.key===key;});
+  if(!p)return '';
+  return '<span class="tag tag-'+key+'">'+icon('dot')+' '+p.name+'</span>';
+}
+function leadStatusTag(status){
+  var map={'جدید':'muted','تماس اولیه':'warning','ارائه شده':'warning','در حال مذاکره':'heevaa','قرارداد (برنده)':'success','بسته‌شده (بازنده)':'danger'};
+  var c=map[status]||'muted';
+  return '<span class="tag tag-'+c+'">'+escapeHtml(status)+'</span>';
+}
+function priorityTag(pr){
+  var map={'کم':'muted','متوسط':'warning','بالا':'danger','فوری':'danger'};
+  return '<span class="tag tag-'+(map[pr]||'muted')+'">'+escapeHtml(pr)+'</span>';
+}
+function leadById(id){return state.leads.find(function(l){return l.id===id;});}
+function taskById(id){return state.tasks.find(function(t){return t.id===id;});}
+function tasksForLead(id){return state.tasks.filter(function(t){return t.leadId===id;}).sort(function(a,b){return a.dueDateISO<b.dueDateISO?-1:1;});}
+
+function taskDueState(t){
+  if(t.status==='done')return 'done';
+  var today=isoToday();
+  if(t.dueDateISO<today)return 'overdue';
+  if(t.dueDateISO===today)return 'today';
+  return 'upcoming';
+}
+
+/* ======================================================================
+   ROUTER / NAV
+   ====================================================================== */
+var currentView='dashboard';
+var taskModalSubtasks=[];
+var currentLeadId=null;
+var leadsFilter={product:'all',status:'all',q:''};
+var tasksFilter={product:'all',status:'open',leadId:'all',q:''};
+var subtasksFilter={q:'',status:'all'};
+var editingGlobalSubtask=null;
+var BUCKET_META={
+  overdue:{label:'عقب‌افتاده',color:'var(--danger)'},
+  today:{label:'امروز',color:'var(--warning)'},
+  tomorrow:{label:'فردا',color:'var(--heevaa)'},
+  week:{label:'این هفته',color:'var(--primary)'},
+  later:{label:'آینده‌تر',color:'var(--text-faint)'},
+  done:{label:'انجام‌شده',color:'var(--success)'}
+};
+var BUCKET_ORDER=['overdue','today','tomorrow','week','later','done'];
+function taskBucket(t,todayIso,tomorrowIso,weekEndIso){
+  if(t.status==='done')return 'done';
+  if(t.dueDateISO<todayIso)return 'overdue';
+  if(t.dueDateISO===todayIso)return 'today';
+  if(t.dueDateISO===tomorrowIso)return 'tomorrow';
+  if(t.dueDateISO<=weekEndIso)return 'week';
+  return 'later';
+}
+function taskTableHead(){
+  return '<div class="task-table-head"><div>وضعیت</div><div>عنوان</div><div>اولویت</div><div>سررسید</div><div></div></div>';
+}
+function renderGroupedTasks(list,opts){
+  opts=opts||{};
+  var today=isoToday();
+  var tmw=new Date();tmw.setDate(tmw.getDate()+1);var tomorrowIso=isoFromDate(tmw);
+  var wk=new Date();wk.setDate(wk.getDate()+7);var weekEndIso=isoFromDate(wk);
+  var buckets={};
+  list.forEach(function(t){var b=taskBucket(t,today,tomorrowIso,weekEndIso);(buckets[b]=buckets[b]||[]).push(t);});
+  var order=opts.only?opts.only:BUCKET_ORDER;
+  var rows='';
+  order.forEach(function(key){
+    var arr=buckets[key];
+    if(!arr||!arr.length)return;
+    arr.sort(function(a,b){return a.dueDateISO<b.dueDateISO?-1:(a.dueDateISO>b.dueDateISO?1:0);});
+    if(key==='done')arr.reverse();
+    var meta=BUCKET_META[key];
+    rows+='<div class="task-group-sep"><span class="dot" style="background:'+meta.color+'"></span>'+meta.label+'<span class="cnt">'+pd(arr.length)+'</span></div>';
+    rows+=arr.map(renderTaskRow).join('');
+  });
+  return '<div class="task-table">'+taskTableHead()+rows+'</div>';
+}
+var calState=(function(){var j=todayJalali();return {jy:j.jy,jm:j.jm};})();
+
+var NAV_ITEMS=[
+  {key:'dashboard',label:'داشبورد',icon:'dashboard'},
+  {key:'leads',label:'لیدها',icon:'users'},
+  {key:'tasks',label:'تسک‌ها',icon:'tasks'},
+  {key:'subtasks',label:'ریزکارها',icon:'checklist'},
+  {key:'calendar',label:'تقویم',icon:'calendar'},
+  {key:'backup',label:'بکاپ و تنظیمات',icon:'backup'}
+];
+
+function renderNav(){
+  var html=NAV_ITEMS.map(function(item){
+    var count='';
+    if(item.key==='leads')count=state.leads.length;
+    if(item.key==='tasks')count=state.tasks.filter(function(t){return t.status!=='done';}).length;
+    if(item.key==='subtasks')count=getAllSubtasksFlat().filter(function(x){return !x.sub.done;}).length;
+    return '<div class="nav-item'+(currentView===item.key?' active':'')+'" onclick="navigate(\''+item.key+'\')">'+
+      icon(item.icon)+'<span>'+item.label+'</span>'+(count!==''?'<span class="count">'+pd(count)+'</span>':'')+'</div>';
+  }).join('');
+  document.getElementById('nav').innerHTML=html;
+}
+function navigate(view,params){
+  currentView=view; currentLeadId=(params&&params.leadId)||null;
+  renderNav();
+  var titles={dashboard:'داشبورد',leads:'لیدها',tasks:'تسک‌ها',subtasks:'ریزکارها',calendar:'تقویم پیگیری',backup:'بکاپ و تنظیمات'};
+  var titleText=titles[view];
+  if(view==='leadDetail'){var lForTitle=leadById(currentLeadId);titleText=lForTitle?lForTitle.name:'لید';}
+  document.getElementById('pageTitle').textContent=titleText;
+  document.getElementById('sidebar').classList.remove('open');
+  if(view==='dashboard')renderDashboard();
+  else if(view==='leads')renderLeadsView();
+  else if(view==='leadDetail')renderLeadDetail(currentLeadId);
+  else if(view==='tasks')renderTasksView();
+  else if(view==='subtasks')renderSubtasksView();
+  else if(view==='calendar')renderCalendarView();
+  else if(view==='backup')renderBackupView();
+  window.scrollTo(0,0);
+}
+function renderAll(){renderNav();navigate(currentView);renderBell();saveSidebarFoot();}
+
+/* ======================================================================
+   DASHBOARD
+   ====================================================================== */
+function renderDashboard(){
+  var root=document.getElementById('view-root');
+  var today=isoToday();
+  var activeLeads=state.leads.filter(function(l){return l.status!=='قرارداد (برنده)'&&l.status!=='بسته‌شده (بازنده)';});
+  var overdue=state.tasks.filter(function(t){return taskDueState(t)==='overdue';});
+  var dueToday=state.tasks.filter(function(t){return taskDueState(t)==='today';});
+  var weekEnd=new Date(); weekEnd.setDate(weekEnd.getDate()+7);
+  var weekEndIso=isoFromDate(weekEnd);
+  var thisWeek=state.tasks.filter(function(t){return t.status!=='done'&&t.dueDateISO>today&&t.dueDateISO<=weekEndIso;});
+
+  var byProduct=PRODUCTS.map(function(p){
+    var n=state.leads.filter(function(l){return l.products.indexOf(p.key)>-1 && l.status!=='قرارداد (برنده)' && l.status!=='بسته‌شده (بازنده)';}).length;
+    return {p:p,n:n};
+  });
+
+  var focusList=overdue.concat(dueToday).sort(function(a,b){return a.dueDateISO<b.dueDateISO?-1:1;});
+
+  root.innerHTML=
+    '<div class="grid grid-4">'+
+      '<div class="stat-card"><div class="num">'+pd(activeLeads.length)+'</div><div class="lbl">لیدهای فعال</div></div>'+
+      '<div class="stat-card" style="border-top:3px solid var(--danger)"><div class="num">'+pd(overdue.length)+'</div><div class="lbl">تسک‌های عقب‌افتاده</div></div>'+
+      '<div class="stat-card" style="border-top:3px solid var(--warning)"><div class="num">'+pd(dueToday.length)+'</div><div class="lbl">سررسید امروز</div></div>'+
+      '<div class="stat-card" style="border-top:3px solid var(--heevaa)"><div class="num">'+pd(thisWeek.length)+'</div><div class="lbl">هفتهٔ پیش رو</div></div>'+
+    '</div>'+
+
+    '<div class="section-title"><h2>وضعیت لیدها بر اساس محصول</h2></div>'+
+    '<div class="grid grid-3">'+
+      byProduct.map(function(x){
+        return '<div class="stat-card accent-'+x.p.key+'"><div class="num">'+pd(x.n)+'</div><div class="lbl">'+x.p.name+' — '+x.p.desc+'</div></div>';
+      }).join('')+
+    '</div>'+
+
+    '<div class="section-title"><h2>در کانون توجه</h2><span class="sub">'+pd(focusList.length)+' مورد</span></div>'+
+    (focusList.length?
+      renderGroupedTasks(focusList,{only:['overdue','today']})
+      :'<div class="empty-state">'+wrapIcon('check')+'<h3>کاری برای امروز باقی نمانده</h3><p>همهٔ تسک‌های امروز و گذشته انجام شده‌اند.</p></div>')+
+
+    '<div class="grid grid-2" style="margin-top:26px;">'+
+      '<div>'+
+        '<div class="section-title"><h2>لیدهای اخیر</h2><span class="sub"></span></div>'+
+        (state.leads.length?
+          '<div class="lead-table">'+state.leads.slice().sort(function(a,b){return b.createdAt.localeCompare(a.createdAt);}).slice(0,5).map(renderLeadRow).join('')+'</div>'
+          :'<div class="empty-state">'+wrapIcon('users')+'<h3>هنوز لیدی ثبت نشده</h3><p>اولین لید خود را اضافه کنید تا پیگیری آن را شروع کنید.</p><button class="btn btn-primary" onclick="openLeadModal()">'+icon('plus')+'افزودن لید</button></div>')+
+      '</div>'+
+      '<div>'+
+        '<div class="section-title"><h2>میان‌بر</h2></div>'+
+        '<div class="card list">'+
+          '<button class="btn" style="width:100%;justify-content:flex-start" onclick="openLeadModal()">'+icon('plus')+'لید جدید</button>'+
+          '<button class="btn" style="width:100%;justify-content:flex-start" onclick="openTaskModal()">'+icon('plus')+'تسک جدید</button>'+
+          '<button class="btn" style="width:100%;justify-content:flex-start" onclick="navigate(\'calendar\')">'+icon('calendar')+'مشاهدهٔ تقویم</button>'+
+          '<button class="btn" style="width:100%;justify-content:flex-start" onclick="navigate(\'backup\')">'+icon('backup')+'وضعیت بکاپ'+(backupHandle?' <span class="tag tag-success" style="margin-inline-start:auto">فعال</span>':' <span class="tag tag-danger" style="margin-inline-start:auto">غیرفعال</span>')+'</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+}
+function wrapIcon(name){return '<div class="ic">'+icon(name)+'</div>';}
+
+/* ======================================================================
+   ROW RENDERERS
+   ====================================================================== */
+function truncate(s,n){s=s||'';return s.length>n?s.slice(0,n).trim()+'…':s;}
+var PRIORITY_DOT={'کم':'var(--text-faint)','متوسط':'var(--warning)','بالا':'var(--danger)','فوری':'var(--danger)'};
+function statusSelectHtml(t){
+  return '<select class="status-select st-'+t.status+'" onclick="event.stopPropagation()" onchange="event.stopPropagation();changeTaskStatus(\''+t.id+'\',this.value)">'+
+    TASK_STATUSES.map(function(s){return '<option value="'+s.key+'"'+(t.status===s.key?' selected':'')+'>'+s.short+'</option>';}).join('')+
+  '</select>';
+}
+function changeTaskStatus(id,newStatus){
+  var t=taskById(id); if(!t)return;
+  t.status=newStatus;
+  persist(); renderCurrentSoft(); renderBell();
+}
+function renderTaskRow(t){
+  var lead=t.leadId?leadById(t.leadId):null;
+  var st=taskDueState(t);
+  var dateColor=(st==='overdue')?'var(--danger)':(st==='today')?'var(--warning)':'var(--text-muted)';
+  var sp=subtaskProgress(t);
+  return '<div class="task-row'+(t.status==='done'?' done':'')+'" data-task="'+t.id+'">'+
+    '<div>'+statusSelectHtml(t)+'</div>'+
+    '<div class="t-main" onclick="openTaskModal(\''+t.id+'\')">'+
+      '<div class="t-title-line"><span class="pdot" style="background:'+(PRIORITY_DOT[t.priority]||'var(--text-faint)')+'" title="اولویت: '+escapeHtml(t.priority)+'"></span><span class="t-title">'+escapeHtml(t.title)+'</span>'+
+        (sp?'<span class="subtask-badge" title="ریزکارهای انجام‌شده">'+icon('check')+' '+pd(sp.done)+'/'+pd(sp.total)+'</span>':'')+
+      '</div>'+
+      '<div class="t-sub">'+
+        (lead?'<span>'+escapeHtml(lead.name)+'</span>':'')+
+        (lead&&t.product&&t.product!=='general'?' · ':'')+
+        (t.product&&t.product!=='general'?'<span>'+escapeHtml((PRODUCTS.find(function(p){return p.key===t.product;})||{}).name||'')+'</span>':(lead?'':'<span>عمومی</span>'))+
+      '</div>'+
+    '</div>'+
+    '<div class="t-priority">'+escapeHtml(t.priority)+'</div>'+
+    '<div class="t-date" style="color:'+dateColor+'" onclick="openTaskModal(\''+t.id+'\')">'+fmtJalali(t.dueDateISO)+(t.dueTime?'<br><span class="t-time">'+pd(t.dueTime)+'</span>':'')+'</div>'+
+    '<div class="t-actions">'+
+      '<button class="icon-btn btn-xs" onclick="event.stopPropagation();openTaskModal(\''+t.id+'\')" title="ویرایش">'+icon('edit')+'</button>'+
+      '<button class="icon-btn btn-xs" onclick="event.stopPropagation();confirmDeleteTask(\''+t.id+'\')" title="حذف">'+icon('trash')+'</button>'+
+    '</div>'+
+  '</div>';
+}
+function leadTableHead(){
+  return '<div class="lead-table-head"><div></div><div>نام و شرکت</div><div>محصولات</div><div>وضعیت</div><div>پیگیری بعدی</div><div></div></div>';
+}
+function renderLeadRow(l){
+  var next=tasksForLead(l.id).filter(function(t){return t.status!=='done';})[0];
+  return '<div class="lead-row" data-lead="'+l.id+'">'+
+    '<div class="avatar-sm">'+escapeHtml((l.name||'?').trim().charAt(0))+'</div>'+
+    '<div class="l-name-cell">'+
+      '<div class="l-name">'+escapeHtml(l.name)+'</div>'+
+      (l.company?'<div class="l-company">'+escapeHtml(l.company)+'</div>':'')+
+    '</div>'+
+    '<div class="l-prods">'+(l.products.length?l.products.map(productTag).join(''):'<span class="cell-muted">—</span>')+'</div>'+
+    '<div>'+leadStatusTag(l.status)+'</div>'+
+    '<div class="cell-muted">'+(next?fmtJalali(next.dueDateISO):'بدون تسک باز')+'</div>'+
+    '<div class="t-actions">'+
+      '<button class="icon-btn btn-xs" onclick="openLeadModal(\''+l.id+'\')" title="ویرایش">'+icon('edit')+'</button>'+
+      '<button class="icon-btn btn-xs" onclick="confirmDeleteLead(\''+l.id+'\')" title="حذف">'+icon('trash')+'</button>'+
+    '</div>'+
+  '</div>';
+}
+
+/* ======================================================================
+   LEADS VIEW
+   ====================================================================== */
+function handleLeadsSearchInput(el){
+  var pos=el.selectionStart;
+  leadsFilter.q=el.value;
+  renderLeadsView();
+  var ni=document.getElementById('leadsSearchBox');
+  if(ni){ni.focus();try{ni.setSelectionRange(pos,pos);}catch(e){}}
+}
+function renderLeadsView(){
+  var root=document.getElementById('view-root');
+  var list=state.leads.filter(function(l){
+    if(leadsFilter.product!=='all' && l.products.indexOf(leadsFilter.product)===-1)return false;
+    if(leadsFilter.status!=='all' && l.status!==leadsFilter.status)return false;
+    if(leadsFilter.q){
+      var q=leadsFilter.q.toLowerCase();
+      if((l.name+' '+l.company).toLowerCase().indexOf(q)===-1)return false;
+    }
+    return true;
+  }).sort(function(a,b){return b.createdAt.localeCompare(a.createdAt);});
+
+  root.innerHTML=
+    '<div class="filterbar">'+
+      '<input type="text" id="leadsSearchBox" placeholder="جست‌وجوی نام یا شرکت..." value="'+escapeHtml(leadsFilter.q)+'" oninput="handleLeadsSearchInput(this)">'+
+      '<select onchange="leadsFilter.product=this.value;renderLeadsView();">'+
+        '<option value="all"'+(leadsFilter.product==='all'?' selected':'')+'>همهٔ محصولات</option>'+
+        PRODUCTS.map(function(p){return '<option value="'+p.key+'"'+(leadsFilter.product===p.key?' selected':'')+'>'+p.name+'</option>';}).join('')+
+      '</select>'+
+      '<select onchange="leadsFilter.status=this.value;renderLeadsView();">'+
+        '<option value="all"'+(leadsFilter.status==='all'?' selected':'')+'>همهٔ وضعیت‌ها</option>'+
+        LEAD_STATUSES.map(function(s){return '<option value="'+s+'"'+(leadsFilter.status===s?' selected':'')+'>'+s+'</option>';}).join('')+
+      '</select>'+
+      '<div style="flex:1"></div>'+
+      '<button class="btn btn-sm" onclick="exportLeadsExcel()" title="دانلود اکسل">'+icon('download')+'اکسل</button>'+
+      '<button class="btn btn-sm" onclick="document.getElementById(\'leadsExcelInput\').click()" title="آپلود اکسل">'+icon('upload')+'اکسل</button>'+
+      '<input type="file" id="leadsExcelInput" accept=".xlsx,.xls" class="hidden" onchange="importLeadsExcel(this)">'+
+      '<button class="btn btn-primary" onclick="openLeadModal()">'+icon('plus')+'لید جدید</button>'+
+    '</div>'+
+    (list.length?'<div class="lead-table">'+leadTableHead()+list.map(renderLeadRow).join('')+'</div>'
+      :'<div class="empty-state">'+wrapIcon('users')+'<h3>لیدی یافت نشد</h3><p>فیلترها را تغییر دهید یا یک لید جدید اضافه کنید.</p><button class="btn btn-primary" onclick="openLeadModal()">'+icon('plus')+'افزودن لید</button></div>');
+}
+
+function renderLeadDetail(id){
+  var l=leadById(id);
+  var root=document.getElementById('view-root');
+  if(!l){root.innerHTML='<div class="empty-state">لید یافت نشد.</div>';return;}
+  var tasks=tasksForLead(id);
+  var open=tasks.filter(function(t){return t.status!=='done';});
+  var done=tasks.filter(function(t){return t.status==='done';});
+
+  root.innerHTML=
+    '<button class="btn btn-ghost btn-sm" style="margin-bottom:14px" onclick="navigate(\'leads\')">'+icon('chevR')+'بازگشت به لیدها</button>'+
+    '<div class="card" style="padding:16px 18px;">'+
+      '<div class="lead-detail-head">'+
+        '<div class="avatar-circle">'+escapeHtml((l.name||'?').trim().charAt(0))+'</div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:16px;font-weight:700">'+escapeHtml(l.name)+'</div>'+
+          '<div style="color:var(--text-muted);font-size:12.5px;margin-top:2px">'+(l.company?icon('building')+' '+escapeHtml(l.company):'شرکت ثبت نشده')+'</div>'+
+          '<div class="meta" style="margin-top:8px">'+l.products.map(productTag).join('')+leadStatusTag(l.status)+'</div>'+
+        '</div>'+
+        '<div class="actions">'+
+          '<button class="icon-btn btn-sm" onclick="openLeadModal(\''+l.id+'\')" title="ویرایش">'+icon('edit')+'</button>'+
+          '<button class="icon-btn btn-sm btn-danger" onclick="confirmDeleteLead(\''+l.id+'\')" title="حذف">'+icon('trash')+'</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="grid grid-3" style="margin-top:4px">'+
+        '<div><div class="hint">تلفن</div><div style="font-size:13px">'+(l.phone?escapeHtml(l.phone):'—')+'</div></div>'+
+        '<div><div class="hint">ایمیل</div><div style="font-size:13px">'+(l.email?escapeHtml(l.email):'—')+'</div></div>'+
+        '<div><div class="hint">منبع</div><div style="font-size:13px">'+(l.source?escapeHtml(l.source):'—')+'</div></div>'+
+      '</div>'+
+      (l.notes?'<div style="margin-top:12px"><div class="hint">یادداشت</div><div style="font-size:13px">'+escapeHtml(l.notes).replace(/\n/g,'<br>')+'</div></div>':'')+
+    '</div>'+
+
+    '<div class="section-title"><h2>تسک‌های باز</h2><span class="sub">'+pd(open.length)+' مورد</span>'+
+      '<div style="flex:1"></div><button class="btn btn-sm btn-primary" onclick="openTaskModal(null,\''+l.id+'\')">'+icon('plus')+'تسک برای این لید</button>'+
+    '</div>'+
+    (open.length?'<div class="task-table">'+taskTableHead()+open.sort(function(a,b){return a.dueDateISO<b.dueDateISO?-1:1;}).map(renderTaskRow).join('')+'</div>'
+      :'<div class="empty-state">'+wrapIcon('tasks')+'<h3>تسک باز ندارد</h3><p>یک تسک برای پیگیری بعدی این لید تعریف کنید.</p></div>')+
+
+    (done.length?
+      '<div class="section-title"><h2>تاریخچهٔ پیگیری‌ها</h2><span class="sub">'+pd(done.length)+' مورد انجام‌شده</span></div>'+
+      '<div class="task-table">'+taskTableHead()+done.slice().reverse().map(renderTaskRow).join('')+'</div>'
+      :'');
+}
+
+/* ======================================================================
+   TASKS VIEW
+   ====================================================================== */
+function handleTasksSearchInput(el){
+  var pos=el.selectionStart;
+  tasksFilter.q=el.value;
+  renderTasksView();
+  var ni=document.getElementById('tasksSearchBox');
+  if(ni){ni.focus();try{ni.setSelectionRange(pos,pos);}catch(e){}}
+}
+function renderTasksView(){
+  var root=document.getElementById('view-root');
+  var list=state.tasks.filter(function(t){
+    if(tasksFilter.product!=='all' && t.product!==tasksFilter.product)return false;
+    if(tasksFilter.leadId!=='all' && t.leadId!==tasksFilter.leadId)return false;
+    if(tasksFilter.status==='open' && t.status==='done')return false;
+    if(['pending','waiting_on_other','meeting_needed','done'].indexOf(tasksFilter.status)>-1 && t.status!==tasksFilter.status)return false;
+    if(tasksFilter.q){
+      var q=tasksFilter.q.toLowerCase();
+      if((t.title+' '+(t.description||'')).toLowerCase().indexOf(q)===-1)return false;
+    }
+    return true;
+  });
+
+  var hasAnyTaskAtAll=state.tasks.length>0;
+
+  root.innerHTML=
+    '<div class="filterbar">'+
+      '<input type="text" id="tasksSearchBox" placeholder="جست‌وجو در عنوان یا توضیحات تسک..." value="'+escapeHtml(tasksFilter.q)+'" oninput="handleTasksSearchInput(this)">'+
+      '<select onchange="tasksFilter.status=this.value;renderTasksView();">'+
+        '<option value="open"'+(tasksFilter.status==='open'?' selected':'')+'>باز (همه به‌جز انجام‌شده)</option>'+
+        TASK_STATUSES.map(function(s){return '<option value="'+s.key+'"'+(tasksFilter.status===s.key?' selected':'')+'>'+s.label+'</option>';}).join('')+
+        '<option value="all"'+(tasksFilter.status==='all'?' selected':'')+'>همه</option>'+
+      '</select>'+
+      '<select onchange="tasksFilter.product=this.value;renderTasksView();">'+
+        '<option value="all">همهٔ محصولات</option>'+
+        PRODUCTS.map(function(p){return '<option value="'+p.key+'"'+(tasksFilter.product===p.key?' selected':'')+'>'+p.name+'</option>';}).join('')+
+        '<option value="general"'+(tasksFilter.product==='general'?' selected':'')+'>عمومی</option>'+
+      '</select>'+
+      '<select onchange="tasksFilter.leadId=this.value;renderTasksView();">'+
+        '<option value="all">همهٔ لیدها</option>'+
+        state.leads.map(function(l){return '<option value="'+l.id+'"'+(tasksFilter.leadId===l.id?' selected':'')+'>'+escapeHtml(l.name)+'</option>';}).join('')+
+      '</select>'+
+      '<div style="flex:1"></div>'+
+      '<button class="btn btn-sm" onclick="exportTasksExcel()" title="دانلود اکسل">'+icon('download')+'اکسل</button>'+
+      '<button class="btn btn-sm" onclick="document.getElementById(\'tasksExcelInput\').click()" title="آپلود اکسل">'+icon('upload')+'اکسل</button>'+
+      '<input type="file" id="tasksExcelInput" accept=".xlsx,.xls" class="hidden" onchange="importTasksExcel(this)">'+
+      '<button class="btn btn-primary" onclick="openTaskModal()">'+icon('plus')+'تسک جدید</button>'+
+    '</div>'+
+    (list.length?renderGroupedTasks(list)
+      : hasAnyTaskAtAll
+        ? '<div class="empty-state">'+wrapIcon('search')+'<h3>موردی با این فیلترها یافت نشد</h3><p>جست‌وجو یا فیلترها را تغییر دهید.</p></div>'
+        : '<div class="empty-state">'+wrapIcon('tasks')+'<h3>هنوز تسکی ثبت نشده</h3><p>اولین تسک پیگیری خود را اضافه کنید.</p><button class="btn btn-primary" onclick="openTaskModal()">'+icon('plus')+'افزودن تسک</button></div>');
+}
+
+/* ======================================================================
+   CALENDAR VIEW  (Jalali month grid)
+   ====================================================================== */
+function renderCalendarView(){
+  var root=document.getElementById('view-root');
+  var jy=calState.jy, jm=calState.jm;
+  var firstIso=jalaliToIso(jy,jm,1);
+  var firstDow=(new Date(firstIso.split('-')[0],firstIso.split('-')[1]-1,firstIso.split('-')[2]).getDay()+1)%7; // 0=Sat
+  var dim=daysInJalaliMonth(jy,jm);
+  var todayIso=isoToday();
+
+  var cells=[];
+  for(var i=0;i<firstDow;i++)cells.push(null);
+  for(var d=1;d<=dim;d++)cells.push(d);
+  while(cells.length%7!==0)cells.push(null);
+
+  var tasksByDate={};
+  state.tasks.forEach(function(t){(tasksByDate[t.dueDateISO]=tasksByDate[t.dueDateISO]||[]).push(t);});
+
+  var monthTotal=0;
+  Object.keys(tasksByDate).forEach(function(iso){var j=isoToJalali(iso);if(j.jy===jy&&j.jm===jm)monthTotal+=tasksByDate[iso].length;});
+
+  root.innerHTML=
+    '<div class="cal-head">'+
+      '<button class="icon-btn" onclick="calMonthShift(-1)">'+icon('chevL')+'</button>'+
+      '<h2>'+JMONTHS[jm-1]+' '+pd(jy)+'</h2>'+
+      '<span class="sub" style="color:var(--text-faint);font-size:12.5px">'+(monthTotal?pd(monthTotal)+' تسک این ماه':'')+'</span>'+
+      '<button class="btn btn-sm" onclick="calGoToday()">امروز</button>'+
+      '<button class="icon-btn" onclick="calMonthShift(1)">'+icon('chevR')+'</button>'+
+    '</div>'+
+    '<div class="cal-grid">'+
+      JWEEKDAYS_SHORT.map(function(w,i){return '<div class="cal-dow'+(i===6?' fri':'')+'">'+w+'</div>';}).join('')+
+      cells.map(function(d,idx){
+        if(d===null)return '<div class="cal-cell other-month"></div>';
+        var iso=jalaliToIso(jy,jm,d);
+        var dayTasks=(tasksByDate[iso]||[]).slice().sort(function(a,b){return (a.dueTime||'').localeCompare(b.dueTime||'');});
+        var isToday=iso===todayIso;
+        var isFri=(idx%7)===6;
+        var openCount=dayTasks.filter(function(t){return t.status!=='done';}).length;
+        var chips=dayTasks.slice(0,2).map(function(t){
+          var cls = (!t.product||t.product==='general') ? 'tag-general' : 'tag-'+t.product;
+          return '<div class="cal-task-chip '+cls+(t.status==='done'?' done-chip':'')+'">'+escapeHtml(truncate(t.title,16))+'</div>';
+        }).join('');
+        return '<div class="cal-cell'+(isToday?' today':'')+'" onclick="openDayModal(\''+iso+'\')">'+
+          '<div class="dnum'+(isFri?' fri':'')+(isToday?' today-num':'')+'">'+pd(d)+'</div>'+
+          '<div class="cal-chips">'+chips+'</div>'+
+          (dayTasks.length>2?'<div class="cal-more">+'+pd(dayTasks.length-2)+' مورد دیگر</div>':'')+
+          (openCount>0?'<span class="cal-count-badge">'+pd(openCount)+'</span>':'')+
+        '</div>';
+      }).join('')+
+    '</div>';
+}
+function calMonthShift(dir){
+  calState.jm+=dir;
+  if(calState.jm>12){calState.jm=1;calState.jy++;}
+  if(calState.jm<1){calState.jm=12;calState.jy--;}
+  renderCalendarView();
+}
+function calGoToday(){var j=todayJalali();calState.jy=j.jy;calState.jm=j.jm;renderCalendarView();}
+function openDayModal(iso){
+  var dayTasks=state.tasks.filter(function(t){return t.dueDateISO===iso;})
+    .sort(function(a,b){return (a.status==='done')-(b.status==='done') || (a.dueTime||'').localeCompare(b.dueTime||'');});
+  var root=document.getElementById('modal-root');
+  root.innerHTML='<div class="modal-backdrop" onclick="if(event.target===this)closeModal()">'+
+    '<div class="modal">'+
+      '<div class="modal-head"><h3>'+fmtJalaliLong(iso)+'</h3><button class="icon-btn btn-sm" style="margin-inline-start:auto" onclick="closeModal()">'+icon('x')+'</button></div>'+
+      '<div class="modal-body">'+
+        (dayTasks.length?'<div class="task-table">'+taskTableHead()+dayTasks.map(renderTaskRow).join('')+'</div>'
+          :'<div class="empty-state">'+wrapIcon('calendar')+'<h3>تسکی در این روز نیست</h3><p>می‌توانید یک تسک جدید برای این روز اضافه کنید.</p></div>')+
+      '</div>'+
+      '<div class="modal-foot"><button class="btn btn-primary" style="width:100%;justify-content:center" onclick="openTaskModalForDate(\''+iso+'\')">'+icon('plus')+'تسک جدید برای این روز</button></div>'+
+    '</div></div>';
+}
+
+/* ======================================================================
+   BACKUP VIEW
+   ====================================================================== */
+function renderBackupView(){
+  var root=document.getElementById('view-root');
+  var notifStatus = ('Notification' in window) ? Notification.permission : 'unsupported';
+  var notifLabel={granted:'فعال',denied:'مسدود شده (از تنظیمات مرورگر باز کنید)',default:'درخواست نشده',unsupported:'پشتیبانی نمی‌شود'}[notifStatus];
+
+  root.innerHTML=
+    '<div class="section-title"><h2>بکاپ خودکار</h2></div>'+
+    '<div class="card" id="backupStatusBox">'+
+      '<div class="backup-status">'+
+        '<span class="dot-live'+(backupHandle?' on':'')+'"></span>'+
+        '<div style="flex:1">'+
+          (backupHandle?
+            '<div style="font-weight:700">متصل به فایل: '+escapeHtml(backupFileName)+'</div><div class="hint">هر تغییری در لیدها و تسک‌ها بلافاصله در این فایل ذخیره می‌شود.'+(lastBackupAt?' آخرین ذخیره: '+pd(lastBackupAt.toLocaleTimeString('fa-IR')):'')+'</div>'
+            :'<div style="font-weight:700">بکاپ خودکار متصل نیست</div><div class="hint">'+(hasFSA?'یک فایل بکاپ انتخاب یا ایجاد کنید. توجه: طبق تنظیمات امنیتی مرورگر، این اتصال با هر بار باز کردن فایل باید یک‌بار تازه شود؛ برای همین به‌محض باز شدن برنامه این گزینه به شما پیشنهاد می‌شود.':'مرورگر شما این قابلیت را پشتیبانی نمی‌کند؛ از دانلود/بازیابی دستی استفاده کنید (پیشنهاد: کروم یا اج).')+'</div>')+
+        '</div>'+
+      '</div>'+
+      (hasFSA?
+        '<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">'+
+          '<button class="btn btn-primary" onclick="createNewBackupFile()">'+icon('backup')+'ایجاد فایل بکاپ جدید و اتصال خودکار</button>'+
+          '<button class="btn" onclick="openExistingBackupFile()">'+icon('upload')+'بازیابی از فایل قبلی و ادامهٔ بکاپ خودکار</button>'+
+        '</div>'
+        :'')+
+    '</div>'+
+
+    '<div class="section-title"><h2>بکاپ و بازیابی دستی</h2><span class="sub">در همهٔ مرورگرها کار می‌کند</span></div>'+
+    '<div class="card" style="display:flex;gap:10px;flex-wrap:wrap">'+
+      '<button class="btn" onclick="exportManualBackup()">'+icon('download')+'دانلود فایل بکاپ (JSON)</button>'+
+      '<button class="btn" onclick="document.getElementById(\'manualImportInput\').click()">'+icon('upload')+'بازیابی از فایل</button>'+
+      '<input type="file" id="manualImportInput" accept="application/json" class="hidden" onchange="importManualBackup(this)">'+
+    '</div>'+
+
+    '<div class="section-title"><h2>اعلان و یادآوری</h2></div>'+
+    '<div class="card">'+
+      '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
+        '<div style="flex:1">'+
+          '<div style="font-weight:700">اعلان مرورگر</div>'+
+          '<div class="hint">وضعیت: '+notifLabel+'. با فعال‌بودن، هنگام رسیدن زمان یادآوری هر تسک، اعلان مرورگر دریافت می‌کنید.</div>'+
+        '</div>'+
+        (notifStatus==='default'?'<button class="btn btn-primary" onclick="requestNotifPermission()">فعال‌سازی اعلان</button>':'')+
+      '</div>'+
+      '<div class="field" style="margin-top:16px;max-width:280px">'+
+        '<label>یادآوری پیش‌فرض تسک‌های جدید</label>'+
+        '<select onchange="state.settings.defaultReminder=Number(this.value);persist();">'+
+          REMINDER_OPTIONS.map(function(o){return '<option value="'+o.v+'"'+(state.settings.defaultReminder===o.v?' selected':'')+'>'+o.l+'</option>';}).join('')+
+        '</select>'+
+      '</div>'+
+      '<div class="hint" style="margin-top:10px">توجه: برای دریافت اعلان، این برنامه باید در یک تب مرورگر باز باشد.</div>'+
+    '</div>'+
+
+    '<div class="section-title"><h2>مدیریت داده‌ها</h2></div>'+
+    '<div class="card">'+
+      '<div style="display:flex;align-items:center;gap:12px">'+
+        '<div style="flex:1"><div style="font-weight:700">پاک‌سازی کامل اطلاعات</div><div class="hint">همهٔ لیدها و تسک‌ها از حافظه پاک می‌شوند (فایل بکاپ متصل تغییری نمی‌کند مگر پس از تأیید).</div></div>'+
+        '<button class="btn btn-danger" onclick="confirmResetAll()">'+icon('trash')+'پاک‌سازی</button>'+
+      '</div>'+
+    '</div>';
+}
+
+/* ======================================================================
+   NOTIFICATIONS
+   ====================================================================== */
+function requestNotifPermission(){
+  if(!('Notification' in window)){toast('مرورگر شما اعلان را پشتیبانی نمی‌کند.','error');return;}
+  Notification.requestPermission().then(function(p){
+    state.settings.notifEnabled=(p==='granted');
+    persist();
+    if(currentView==='backup')renderBackupView();
+    toast(p==='granted'?'اعلان فعال شد.':'اعلان فعال نشد.', p==='granted'?'success':'error');
+  });
+}
+function checkReminders(){
+  var now=new Date();
+  var changed=false;
+  state.tasks.forEach(function(t){
+    if(t.status==='done'||t.notified||!t.reminderMinutes)return;
+    var timeStr=t.dueTime||'09:00';
+    var due=new Date(t.dueDateISO+'T'+timeStr+':00');
+    var remTime=new Date(due.getTime()-t.reminderMinutes*60000);
+    if(now>=remTime){
+      t.notified=true; changed=true;
+      if('Notification' in window && Notification.permission==='granted'){
+        var lead=t.leadId?leadById(t.leadId):null;
+        try{
+          new Notification('یادآوری: '+t.title,{
+            body:(lead?('لید: '+lead.name+' — '):'')+'سررسید: '+fmtJalali(t.dueDateISO)+(t.dueTime?(' ساعت '+t.dueTime):''),
+            tag:t.id
+          });
+        }catch(e){}
+      }
+    }
+  });
+  if(changed){persist();renderBell();}
+}
+setInterval(checkReminders,30000);
+
+function renderBell(){
+  var today=isoToday();
+  var due=state.tasks.filter(function(t){return t.status!=='done'&&(taskDueState(t)==='overdue'||taskDueState(t)==='today');})
+    .sort(function(a,b){return a.dueDateISO<b.dueDateISO?-1:1;});
+  var countEl=document.getElementById('bellCount');
+  if(due.length){countEl.textContent=pd(due.length>9?'9+':due.length);countEl.classList.remove('hidden');}
+  else countEl.classList.add('hidden');
+  var panel=document.getElementById('bellPanel');
+  panel.innerHTML='<div class="dp-head">یادآوری‌ها ('+pd(due.length)+')</div>'+
+    (due.length? due.slice(0,12).map(function(t){
+      var lead=t.leadId?leadById(t.leadId):null;
+      var overdue=taskDueState(t)==='overdue';
+      return '<div class="dp-item" style="cursor:pointer" onclick="toggleBell();openTaskModal(\''+t.id+'\')">'+
+        '<div style="font-weight:700">'+escapeHtml(t.title)+'</div>'+
+        '<div class="hint" style="color:'+(overdue?'var(--danger)':'var(--warning)')+'">'+(overdue?'عقب‌افتاده — ':'')+fmtJalali(t.dueDateISO)+(t.dueTime?' — '+pd(t.dueTime):'')+(lead?' · '+escapeHtml(lead.name):'')+'</div>'+
+      '</div>';
+    }).join('') : '<div class="dp-empty">یادآوری فعالی وجود ندارد</div>');
+}
+function toggleBell(){
+  var p=document.getElementById('bellPanel');
+  p.classList.toggle('hidden');
+}
+document.addEventListener('click',function(e){
+  var dd=document.querySelector('.dropdown');
+  if(dd && !dd.contains(e.target)) document.getElementById('bellPanel').classList.add('hidden');
+  var sb=document.getElementById('sidebar'), mb=document.getElementById('menuBtn');
+  if(sb && sb.classList.contains('open') && !sb.contains(e.target) && e.target!==mb && !mb.contains(e.target)){
+    sb.classList.remove('open');
+  }
+});
+
+/* ======================================================================
+   CRUD — LEADS
+   ====================================================================== */
+function addLead(data){
+  data.id=uid(); data.createdAt=new Date().toISOString();
+  state.leads.push(data); persist();
+}
+function addLeadSilent(data){
+  data.id=uid(); data.createdAt=new Date().toISOString();
+  state.leads.push(data);
+}
+function updateLead(id,data){
+  var l=leadById(id); if(!l)return; Object.assign(l,data); persist();
+}
+function deleteLead(id){
+  state.leads=state.leads.filter(function(l){return l.id!==id;});
+  state.tasks.forEach(function(t){if(t.leadId===id)t.leadId=null;});
+  persist();
+  if(currentView==='leadDetail'&&currentLeadId===id)navigate('leads');
+  else renderAll();
+}
+function confirmDeleteLead(id){
+  var l=leadById(id);
+  openConfirm('حذف لید','آیا از حذف «'+escapeHtml(l?l.name:'')+'» مطمئن هستید؟ تسک‌های مرتبط حذف نمی‌شوند اما از این لید جدا می‌شوند.',function(){deleteLead(id);toast('لید حذف شد.','success');});
+}
+
+/* ======================================================================
+   CRUD — TASKS
+   ====================================================================== */
+function addTask(data){
+  data.id=uid(); data.createdAt=new Date().toISOString(); data.notified=false;
+  if(!data.status)data.status='pending';
+  state.tasks.push(data); persist();
+}
+function addTaskSilent(data){
+  data.id=uid(); data.createdAt=new Date().toISOString(); data.notified=false;
+  if(!data.status)data.status='pending';
+  state.tasks.push(data);
+}
+function updateTask(id,data){
+  var t=taskById(id); if(!t)return;
+  var dueChanged = data.dueDateISO!==t.dueDateISO || data.dueTime!==t.dueTime;
+  Object.assign(t,data);
+  if(dueChanged)t.notified=false;
+  persist();
+}
+function deleteTask(id){
+  state.tasks=state.tasks.filter(function(t){return t.id!==id;});
+  persist(); renderCurrentSoft();
+}
+function confirmDeleteTask(id){
+  var t=taskById(id);
+  openConfirm('حذف تسک','آیا از حذف «'+escapeHtml(t?t.title:'')+'» مطمئن هستید؟',function(){deleteTask(id);toast('تسک حذف شد.','success');});
+}
+function renderCurrentSoft(){
+  renderNav();
+  if(currentView==='dashboard')renderDashboard();
+  else if(currentView==='leads')renderLeadsView();
+  else if(currentView==='leadDetail')renderLeadDetail(currentLeadId);
+  else if(currentView==='tasks')renderTasksView();
+  else if(currentView==='subtasks')renderSubtasksView();
+  else if(currentView==='calendar')renderCalendarView();
+  else if(currentView==='backup')renderBackupView();
+}
+
+function confirmResetAll(){
+  openConfirm('پاک‌سازی کامل اطلاعات','همهٔ لیدها و تسک‌ها از حافظه برنامه حذف می‌شوند. این کار قابل بازگشت نیست مگر با بازیابی از فایل بکاپ. ادامه می‌دهید؟',function(){
+    state.leads=[]; state.tasks=[]; persist(); renderAll(); toast('اطلاعات پاک‌سازی شد.','success');
+  });
+}
+
+/* ======================================================================
+   MODALS — generic confirm
+   ====================================================================== */
+function openConfirm(title,msg,onYes){
+  var root=document.getElementById('modal-root');
+  root.innerHTML='<div class="modal-backdrop" onclick="if(event.target===this)closeModal()">'+
+    '<div class="modal modal-sm">'+
+      '<div class="modal-head"><h3>'+escapeHtml(title)+'</h3></div>'+
+      '<div class="modal-body">'+escapeHtml(msg)+'</div>'+
+      '<div class="modal-foot"><button class="btn" onclick="closeModal()">انصراف</button><button class="btn btn-danger" id="confirmYesBtn">تأیید و حذف</button></div>'+
+    '</div></div>';
+  document.getElementById('confirmYesBtn').onclick=function(){onYes();closeModal();};
+}
+function closeModal(){
+  document.getElementById('modal-root').innerHTML='';
+  var r2=document.getElementById('modal-root-2');
+  if(r2)r2.innerHTML='';
+}
+
+/* ======================================================================
+   MODAL — LEAD FORM
+   ====================================================================== */
+function openLeadModal(id){
+  var l=id?leadById(id):null;
+  var root=document.getElementById('modal-root');
+  root.innerHTML='<div class="modal-backdrop">'+
+    '<div class="modal">'+
+      '<div class="modal-head"><h3>'+(l?'ویرایش لید':'لید جدید')+'</h3><button class="icon-btn btn-sm" style="margin-inline-start:auto" onclick="closeModal()" title="بستن">'+icon('x')+'</button></div>'+
+      '<div class="modal-body">'+
+        '<div class="form-grid">'+
+          '<div class="field full"><label>نام مخاطب *</label><input type="text" id="fLeadName" value="'+(l?escapeHtml(l.name):'')+'" placeholder="مثلاً علی رضایی"></div>'+
+          '<div class="field full"><label>نام شرکت / سازمان</label><input type="text" id="fLeadCompany" value="'+(l?escapeHtml(l.company):'')+'"></div>'+
+          '<div class="field"><label>تلفن</label><input type="tel" id="fLeadPhone" value="'+(l?escapeHtml(l.phone):'')+'"></div>'+
+          '<div class="field"><label>ایمیل</label><input type="email" id="fLeadEmail" value="'+(l?escapeHtml(l.email):'')+'"></div>'+
+          '<div class="field full"><label>محصول(های) مرتبط</label><div class="checkbox-row">'+
+            PRODUCTS.map(function(p){return '<label class="checkbox-item"><input type="checkbox" value="'+p.key+'" class="fLeadProduct" '+(l&&l.products.indexOf(p.key)>-1?'checked':'')+'> '+p.name+'</label>';}).join('')+
+          '</div></div>'+
+          '<div class="field"><label>وضعیت</label><select id="fLeadStatus">'+
+            LEAD_STATUSES.map(function(s){return '<option value="'+s+'"'+(l&&l.status===s?' selected':'')+'>'+s+'</option>';}).join('')+
+          '</select></div>'+
+          '<div class="field"><label>منبع لید</label><select id="fLeadSource">'+
+            '<option value="">—</option>'+LEAD_SOURCES.map(function(s){return '<option value="'+s+'"'+(l&&l.source===s?' selected':'')+'>'+s+'</option>';}).join('')+
+          '</select></div>'+
+          '<div class="field full"><label>یادداشت</label><textarea id="fLeadNotes">'+(l?escapeHtml(l.notes):'')+'</textarea></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="modal-foot"><button class="btn" onclick="closeModal()">انصراف</button><button class="btn btn-primary" onclick="submitLeadForm('+(l?"'"+l.id+"'":'null')+')">'+icon('check')+(l?'ذخیرهٔ تغییرات':'افزودن لید')+'</button></div>'+
+    '</div></div>';
+}
+function submitLeadForm(id){
+  var name=document.getElementById('fLeadName').value.trim();
+  if(!name){toast('نام مخاطب الزامی است.','error');return;}
+  var products=Array.prototype.slice.call(document.querySelectorAll('.fLeadProduct:checked')).map(function(c){return c.value;});
+  var data={
+    name:name,
+    company:document.getElementById('fLeadCompany').value.trim(),
+    phone:document.getElementById('fLeadPhone').value.trim(),
+    email:document.getElementById('fLeadEmail').value.trim(),
+    products:products,
+    status:document.getElementById('fLeadStatus').value,
+    source:document.getElementById('fLeadSource').value,
+    notes:document.getElementById('fLeadNotes').value.trim()
+  };
+  if(id){updateLead(id,data);toast('لید به‌روزرسانی شد.','success');}
+  else{addLead(data);toast('لید اضافه شد.','success');}
+  closeModal(); renderCurrentSoft();
+}
+
+/* ======================================================================
+   MODAL — TASK FORM
+   ====================================================================== */
+function openTaskModal(id,prefillLeadId){
+  var t=id?taskById(id):null;
+  var j = t? isoToJalali(t.dueDateISO) : (function(){var n=todayJalali();return n;})();
+  var leadId = t? t.leadId : (prefillLeadId||'');
+  taskModalSubtasks = (t && Array.isArray(t.subtasks)) ? t.subtasks.map(function(s){return Object.assign({},s);}) : [];
+  editingSubtaskId=null;
+  var root=document.getElementById('modal-root');
+  root.innerHTML='<div class="modal-backdrop">'+
+    '<div class="modal">'+
+      '<div class="modal-head"><h3>'+(t?'ویرایش تسک':'تسک جدید')+'</h3><button class="icon-btn btn-sm" style="margin-inline-start:auto" onclick="closeModal()" title="بستن">'+icon('x')+'</button></div>'+
+      '<div class="modal-body">'+
+        '<div class="form-grid">'+
+          '<div class="field full"><label>عنوان تسک *</label><input type="text" id="fTaskTitle" value="'+(t?escapeHtml(t.title):'')+'" placeholder="مثلاً تماس پیگیری قیمت‌گذاری"></div>'+
+          '<div class="field full"><label>مرتبط با لید</label>'+
+            '<div style="display:flex;gap:8px">'+
+              '<select id="fTaskLead" style="flex:1" onchange="onTaskLeadChange()">'+
+                '<option value="">بدون لید (تسک عمومی/داخلی)</option>'+
+                state.leads.map(function(l){return '<option value="'+l.id+'"'+(leadId===l.id?' selected':'')+'>'+escapeHtml(l.name)+(l.company?' — '+escapeHtml(l.company):'')+'</option>';}).join('')+
+              '</select>'+
+              '<button type="button" class="btn btn-sm" id="viewLeadBtn" '+(leadId?'':'disabled')+' onclick="viewSelectedLead()" title="نمایش اطلاعات لید">'+icon('users')+'مشاهدهٔ لید</button>'+
+            '</div>'+
+          '</div>'+
+          '<div class="field"><label>محصول</label><select id="fTaskProduct">'+
+            renderProductOptions(leadId,t?t.product:null)+
+          '</select></div>'+
+          '<div class="field"><label>اولویت</label><select id="fTaskPriority">'+
+            TASK_PRIORITIES.map(function(p){return '<option value="'+p.k+'"'+(t&&t.priority===p.k?' selected':(!t&&p.k==='متوسط'?' selected':''))+'>'+p.k+'</option>';}).join('')+
+          '</select></div>'+
+          '<div class="field"><label>وضعیت</label><select id="fTaskStatus">'+
+            TASK_STATUSES.map(function(s){return '<option value="'+s.key+'"'+((t?t.status:'pending')===s.key?' selected':'')+'>'+s.label+'</option>';}).join('')+
+          '</select></div>'+
+          '<div class="field full"><label>تاریخ سررسید (شمسی) *</label>'+
+            '<div class="date-select-group">'+
+              '<select id="fTaskDay"></select>'+
+              '<select id="fTaskMonth" onchange="populateDayOptions()">'+JMONTHS.map(function(m,i){return '<option value="'+(i+1)+'"'+((j.jm===i+1)?' selected':'')+'>'+m+'</option>';}).join('')+'</select>'+
+              '<select id="fTaskYear" onchange="populateDayOptions()">'+yearOptions(j.jy)+'</select>'+
+            '</div>'+
+          '</div>'+
+          '<div class="field"><label>ساعت (اختیاری)</label><input type="time" id="fTaskTime" value="'+(t&&t.dueTime?t.dueTime:'')+'"></div>'+
+          '<div class="field"><label>یادآوری</label><select id="fTaskReminder">'+
+            REMINDER_OPTIONS.map(function(o){return '<option value="'+o.v+'"'+((t?t.reminderMinutes:state.settings.defaultReminder)===o.v?' selected':'')+'>'+o.l+'</option>';}).join('')+
+          '</select></div>'+
+          '<div class="field full"><label>توضیحات</label><textarea id="fTaskDesc">'+(t?escapeHtml(t.description||''):'')+'</textarea></div>'+
+          '<div class="field full">'+
+            '<label>ریزکارها و پیگیری‌های انجام‌شده <span id="subtaskCountLabel" class="hint" style="font-weight:400"></span></label>'+
+            '<div style="display:flex;gap:8px;margin-bottom:8px">'+
+              '<input type="text" id="subtaskInput" placeholder="مثلاً: با مشتری تماس گرفتم و قیمت را اعلام کردم..." style="flex:1" onkeydown="handleSubtaskInputKey(event)">'+
+              '<button type="button" class="btn btn-sm" onclick="addSubtaskDraft()">'+icon('plus')+'افزودن</button>'+
+            '</div>'+
+            '<div id="subtaskListContainer"></div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="modal-foot">'+
+        (t?'<button class="btn btn-danger" style="margin-inline-end:auto" onclick="confirmDeleteTask(\''+t.id+'\');closeModal();">'+icon('trash')+'حذف</button>':'')+
+        '<button class="btn" onclick="closeModal()">انصراف</button>'+
+        '<button class="btn btn-primary" onclick="submitTaskForm('+(t?"'"+t.id+"'":'null')+')">'+icon('check')+(t?'ذخیرهٔ تغییرات':'افزودن تسک')+'</button>'+
+      '</div>'+
+    '</div></div>';
+  populateDayOptions(t?j.jd:j.jd);
+  refreshSubtaskUI();
+}
+function openTaskModalForDate(iso){
+  openTaskModal();
+  var j=isoToJalali(iso);
+  document.getElementById('fTaskYear').value=j.jy;
+  populateDayOptions();
+  document.getElementById('fTaskMonth').value=j.jm;
+  populateDayOptions(j.jd);
+}
+function yearOptions(selYear){
+  var base=todayJalali().jy; var opts='';
+  for(var y=base-1;y<=base+3;y++)opts+='<option value="'+y+'"'+(y===selYear?' selected':'')+'>'+pd(y)+'</option>';
+  return opts;
+}
+function populateDayOptions(selDay){
+  var ySel=document.getElementById('fTaskYear'), mSel=document.getElementById('fTaskMonth'), dSel=document.getElementById('fTaskDay');
+  if(!ySel||!mSel||!dSel)return;
+  var jy=Number(ySel.value), jm=Number(mSel.value);
+  var dim=daysInJalaliMonth(jy,jm);
+  var current=selDay||Number(dSel.value)||1;
+  if(current>dim)current=dim;
+  var opts='';
+  for(var d=1;d<=dim;d++)opts+='<option value="'+d+'"'+(d===current?' selected':'')+'>'+pd(d)+'</option>';
+  dSel.innerHTML=opts;
+}
+function renderProductOptions(leadId,selected){
+  var lead=leadId?leadById(leadId):null;
+  var opts=[];
+  var avail = lead && lead.products.length ? PRODUCTS.filter(function(p){return lead.products.indexOf(p.key)>-1;}) : PRODUCTS;
+  avail.forEach(function(p){opts.push('<option value="'+p.key+'"'+(selected===p.key?' selected':'')+'>'+p.name+'</option>');});
+  opts.push('<option value="general"'+(selected==='general'||!selected?' selected':'')+'>عمومی / داخلی</option>');
+  return opts.join('');
+}
+function onTaskLeadChange(){
+  var leadId=document.getElementById('fTaskLead').value;
+  var productSel=document.getElementById('fTaskProduct');
+  var current=productSel.value;
+  productSel.innerHTML=renderProductOptions(leadId,current);
+  var viewBtn=document.getElementById('viewLeadBtn');
+  if(viewBtn)viewBtn.disabled=!leadId;
+}
+function viewSelectedLead(){
+  var sel=document.getElementById('fTaskLead');
+  var leadId=sel?sel.value:'';
+  if(!leadId){toast('ابتدا یک لید را از فهرست انتخاب کنید.','error');return;}
+  var l=leadById(leadId);
+  if(!l){toast('لید یافت نشد؛ ممکن است حذف شده باشد.','error');return;}
+  var root=document.getElementById('modal-root-2');
+  root.innerHTML='<div class="modal-backdrop" style="z-index:130" onclick="if(event.target===this)closeLeadPeek()">'+
+    '<div class="modal modal-sm">'+
+      '<div class="modal-head"><h3>اطلاعات لید</h3><button class="icon-btn btn-sm" style="margin-inline-start:auto" onclick="closeLeadPeek()" title="بستن">'+icon('x')+'</button></div>'+
+      '<div class="modal-body">'+
+        '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+
+          '<div class="avatar-circle">'+escapeHtml((l.name||'?').trim().charAt(0))+'</div>'+
+          '<div style="min-width:0">'+
+            '<div style="font-weight:700;font-size:15px">'+escapeHtml(l.name)+'</div>'+
+            (l.company?'<div style="font-size:12.5px;color:var(--text-muted)">'+icon('building')+' '+escapeHtml(l.company)+'</div>':'')+
+          '</div>'+
+        '</div>'+
+        '<div class="meta" style="margin-bottom:14px">'+l.products.map(productTag).join('')+leadStatusTag(l.status)+'</div>'+
+        '<div class="grid grid-3" style="margin-bottom:10px">'+
+          '<div><div class="hint">تلفن</div><div style="font-size:13px">'+(l.phone?escapeHtml(l.phone):'—')+'</div></div>'+
+          '<div><div class="hint">ایمیل</div><div style="font-size:13px">'+(l.email?escapeHtml(l.email):'—')+'</div></div>'+
+          '<div><div class="hint">منبع</div><div style="font-size:13px">'+(l.source?escapeHtml(l.source):'—')+'</div></div>'+
+        '</div>'+
+        (l.notes?'<div><div class="hint">یادداشت</div><div style="font-size:13px">'+escapeHtml(l.notes).replace(/\n/g,'<br>')+'</div></div>':'')+
+      '</div>'+
+    '</div></div>';
+}
+function closeLeadPeek(){
+  var root=document.getElementById('modal-root-2');
+  if(root)root.innerHTML='';
+}
+
+/* ---------- subtask / progress-log checklist inside the task form ---------- */
+var editingSubtaskId=null;
+function renderSubtaskListHtml(){
+  if(!taskModalSubtasks.length)return '<div class="hint" style="padding:6px 0">هنوز ریزکاری ثبت نشده؛ هر بار کاری روی این تسک انجام دادید، اینجا اضافه کنید.</div>';
+  var sorted=taskModalSubtasks.slice().sort(function(a,b){return a.createdAt<b.createdAt?-1:1;});
+  return '<div class="subtask-list">'+sorted.map(function(s){
+    if(editingSubtaskId===s.id){
+      return '<div class="subtask-item editing">'+
+        '<div class="subtask-check'+(s.done?' checked':'')+'" onclick="toggleSubtaskDraft(\''+s.id+'\')" title="انجام‌شده/نشده">'+(s.done?icon('check'):'')+'</div>'+
+        '<input type="text" class="subtask-edit-input" id="subtaskEditInput_'+s.id+'" value="'+escapeHtml(s.text)+'" onkeydown="handleSubtaskEditKey(event,\''+s.id+'\')">'+
+        '<button type="button" class="icon-btn btn-xs" onclick="confirmEditSubtask(\''+s.id+'\')" title="ذخیره">'+icon('check')+'</button>'+
+        '<button type="button" class="icon-btn btn-xs" onclick="cancelEditSubtask()" title="انصراف">'+icon('x')+'</button>'+
+      '</div>';
+    }
+    return '<div class="subtask-item'+(s.done?' done':'')+'">'+
+      '<div class="subtask-check'+(s.done?' checked':'')+'" onclick="toggleSubtaskDraft(\''+s.id+'\')" title="انجام‌شده/نشده">'+(s.done?icon('check'):'')+'</div>'+
+      '<div class="subtask-text">'+escapeHtml(s.text)+'</div>'+
+      '<div class="subtask-date">'+fmtJalali(isoFromDate(new Date(s.createdAt)))+'</div>'+
+      '<button type="button" class="icon-btn btn-xs" onclick="startEditSubtask(\''+s.id+'\')" title="ویرایش">'+icon('edit')+'</button>'+
+      '<button type="button" class="icon-btn btn-xs" onclick="deleteSubtaskDraft(\''+s.id+'\')" title="حذف">'+icon('trash')+'</button>'+
+    '</div>';
+  }).join('')+'</div>';
+}
+function refreshSubtaskUI(){
+  var c=document.getElementById('subtaskListContainer');
+  if(c)c.innerHTML=renderSubtaskListHtml();
+  var lbl=document.getElementById('subtaskCountLabel');
+  if(lbl){
+    var done=taskModalSubtasks.filter(function(s){return s.done;}).length;
+    lbl.textContent=taskModalSubtasks.length?('('+pd(done)+'/'+pd(taskModalSubtasks.length)+' انجام‌شده)'):'';
+  }
+  if(editingSubtaskId){
+    var ei=document.getElementById('subtaskEditInput_'+editingSubtaskId);
+    if(ei){ei.focus();ei.setSelectionRange(ei.value.length,ei.value.length);}
+  }
+}
+function addSubtaskDraft(){
+  var input=document.getElementById('subtaskInput');
+  if(!input)return;
+  var val=input.value.trim();
+  if(!val)return;
+  taskModalSubtasks.push({id:uid(),text:val,done:false,createdAt:new Date().toISOString()});
+  input.value='';
+  refreshSubtaskUI();
+  input.focus();
+}
+function toggleSubtaskDraft(id){
+  var s=taskModalSubtasks.find(function(x){return x.id===id;});
+  if(s){s.done=!s.done;refreshSubtaskUI();}
+}
+function deleteSubtaskDraft(id){
+  taskModalSubtasks=taskModalSubtasks.filter(function(x){return x.id!==id;});
+  if(editingSubtaskId===id)editingSubtaskId=null;
+  refreshSubtaskUI();
+}
+function startEditSubtask(id){
+  editingSubtaskId=id;
+  refreshSubtaskUI();
+}
+function confirmEditSubtask(id){
+  var input=document.getElementById('subtaskEditInput_'+id);
+  if(!input)return;
+  var val=input.value.trim();
+  if(!val){toast('متن ریزکار نمی‌تواند خالی باشد.','error');return;}
+  var s=taskModalSubtasks.find(function(x){return x.id===id;});
+  if(s)s.text=val;
+  editingSubtaskId=null;
+  refreshSubtaskUI();
+}
+function cancelEditSubtask(){
+  editingSubtaskId=null;
+  refreshSubtaskUI();
+}
+function handleSubtaskEditKey(e,id){
+  if(e.key==='Enter'){e.preventDefault();confirmEditSubtask(id);}
+  else if(e.key==='Escape'){e.preventDefault();cancelEditSubtask();}
+}
+function handleSubtaskInputKey(e){
+  if(e.key==='Enter'){e.preventDefault();addSubtaskDraft();}
+}
+function subtaskProgress(t){
+  if(!t.subtasks||!t.subtasks.length)return null;
+  var done=t.subtasks.filter(function(s){return s.done;}).length;
+  return {done:done,total:t.subtasks.length};
+}
+function getAllSubtasksFlat(){
+  var out=[];
+  state.tasks.forEach(function(t){
+    (t.subtasks||[]).forEach(function(s){out.push({task:t,sub:s});});
+  });
+  return out;
+}
+
+function ensureSubtaskOrderConsistent(){
+  if(!Array.isArray(state.subtaskOrder))state.subtaskOrder=[];
+  var flat=getAllSubtasksFlat();
+  var allIds=flat.map(function(x){return x.sub.id;});
+  state.subtaskOrder=state.subtaskOrder.filter(function(id){return allIds.indexOf(id)>-1;});
+  var missing=allIds.filter(function(id){return state.subtaskOrder.indexOf(id)===-1;});
+  if(missing.length){
+    missing.sort(function(a,b){
+      var A=flat.find(function(x){return x.sub.id===a;}).sub.createdAt;
+      var B=flat.find(function(x){return x.sub.id===b;}).sub.createdAt;
+      return A<B?1:-1;
+    });
+    state.subtaskOrder=state.subtaskOrder.concat(missing);
+  }
+}
+function moveSubtaskInOrder(draggedId,targetId,position){
+  ensureSubtaskOrderConsistent();
+  var order=state.subtaskOrder;
+  var fromIdx=order.indexOf(draggedId);
+  if(fromIdx>-1)order.splice(fromIdx,1);
+  var toIdx=order.indexOf(targetId);
+  if(toIdx===-1){order.push(draggedId);}
+  else{
+    if(position==='after')toIdx+=1;
+    order.splice(toIdx,0,draggedId);
+  }
+  persist();
+  animateSubtaskReorder();
+}
+// Records each row's current on-screen position, re-renders the list, then
+// smoothly animates every row from its old position to its new one
+// (a lightweight FLIP animation) instead of an abrupt jump.
+function animateSubtaskReorder(){
+  var container=document.querySelector('.subtask-table');
+  var firstRects={};
+  if(container){
+    Array.prototype.slice.call(container.querySelectorAll('.subtask-row')).forEach(function(r){
+      var id=r.getAttribute('data-sub-id');
+      if(id)firstRects[id]=r.getBoundingClientRect().top;
+    });
+  }
+  renderSubtasksView();
+  var newContainer=document.querySelector('.subtask-table');
+  if(!newContainer)return;
+  Array.prototype.slice.call(newContainer.querySelectorAll('.subtask-row')).forEach(function(r){
+    var id=r.getAttribute('data-sub-id');
+    if(!id || !(id in firstRects))return;
+    var dy=firstRects[id]-r.getBoundingClientRect().top;
+    if(Math.abs(dy)<1)return;
+    r.style.transition='none';
+    r.style.transform='translateY('+dy+'px)';
+    requestAnimationFrame(function(){
+      r.style.transition='transform .22s cubic-bezier(.2,.8,.3,1)';
+      r.style.transform='';
+    });
+  });
+}
+
+var subtaskDragState=null; // {id, rowEl, startClientY, overId, overPos}
+function ensureDragIndicator(){
+  var ind=document.getElementById('subDragIndicator');
+  if(!ind){
+    ind=document.createElement('div');
+    ind.id='subDragIndicator';
+    ind.className='sub-drag-indicator';
+    document.body.appendChild(ind);
+  }
+  return ind;
+}
+function positionDragIndicator(rect,visible){
+  var ind=ensureDragIndicator();
+  if(!visible){ind.style.opacity='0';return;}
+  ind.style.top=rect.top+'px';
+  ind.style.left=rect.left+'px';
+  ind.style.width=rect.width+'px';
+  ind.style.opacity='1';
+}
+function startSubtaskDrag(e,id){
+  e.preventDefault();
+  var row=e.target.closest('.subtask-row');
+  if(!row)return;
+  subtaskDragState={id:id,rowEl:row,startClientY:e.clientY,overId:null,overPos:null};
+  row.classList.add('dragging');
+  row.style.transition='none';
+  ensureDragIndicator();
+  try{e.target.setPointerCapture(e.pointerId);}catch(err){}
+  document.addEventListener('pointermove',onSubtaskDragMove);
+  document.addEventListener('pointerup',onSubtaskDragEnd);
+  document.addEventListener('pointercancel',onSubtaskDragEnd);
+}
+function onSubtaskDragMove(e){
+  if(!subtaskDragState)return;
+  var dy=e.clientY-subtaskDragState.startClientY;
+  subtaskDragState.rowEl.style.transform='translateY('+dy+'px)';
+
+  var container=document.querySelector('.subtask-table');
+  if(!container)return;
+  var rows=Array.prototype.slice.call(container.querySelectorAll('.subtask-row'));
+  var y=e.clientY;
+  var bestRow=null,bestPos=null,bestDist=Infinity;
+  rows.forEach(function(r){
+    if(r===subtaskDragState.rowEl)return;
+    var rect=r.getBoundingClientRect();
+    var mid=rect.top+rect.height/2;
+    var dist=Math.abs(y-mid);
+    if(dist<bestDist){bestDist=dist;bestRow=r;bestPos=(y<mid)?'before':'after';}
+  });
+  if(bestRow){
+    var r=bestRow.getBoundingClientRect();
+    var lineTop = bestPos==='before' ? r.top-1.5 : r.bottom-1.5;
+    positionDragIndicator({top:lineTop,left:r.left,width:r.width},true);
+    subtaskDragState.overId=bestRow.getAttribute('data-sub-id');
+    subtaskDragState.overPos=bestPos;
+  }else{
+    positionDragIndicator(null,false);
+    subtaskDragState.overId=null;
+    subtaskDragState.overPos=null;
+  }
+}
+function onSubtaskDragEnd(e){
+  if(!subtaskDragState)return;
+  var st=subtaskDragState;
+  document.removeEventListener('pointermove',onSubtaskDragMove);
+  document.removeEventListener('pointerup',onSubtaskDragEnd);
+  document.removeEventListener('pointercancel',onSubtaskDragEnd);
+  st.rowEl.style.transition='';
+  st.rowEl.style.transform='';
+  st.rowEl.classList.remove('dragging');
+  positionDragIndicator(null,false);
+  subtaskDragState=null;
+  if(st.overId && st.overId!==st.id){
+    moveSubtaskInOrder(st.id,st.overId,st.overPos);
+  }
+}
+
+/* ======================================================================
+   GLOBAL SUBTASKS PAGE  (all sub-tasks across every task, in one place)
+   ====================================================================== */
+function subtaskTableHead(){
+  return '<div class="subtask-table-head"><div></div><div></div><div>متن</div><div>مربوط به تسک</div><div>تاریخ</div><div></div></div>';
+}
+function renderGlobalSubtaskRow(item){
+  var t=item.task, s=item.sub;
+  var lead=t.leadId?leadById(t.leadId):null;
+  if(editingGlobalSubtask===s.id){
+    return '<div class="subtask-row editing" data-sub-id="'+s.id+'">'+
+      '<div class="drag-handle" style="visibility:hidden">'+icon('grip')+'</div>'+
+      '<div class="subtask-check'+(s.done?' checked':'')+'" onclick="toggleGlobalSubtask(\''+t.id+'\',\''+s.id+'\')" title="انجام‌شده/نشده">'+(s.done?icon('check'):'')+'</div>'+
+      '<input type="text" class="subtask-edit-input" id="gSubtaskEditInput_'+s.id+'" value="'+escapeHtml(s.text)+'" onkeydown="handleGlobalSubtaskEditKey(event,\''+t.id+'\',\''+s.id+'\')">'+
+      '<div class="sg-parent">'+escapeHtml(t.title)+'</div>'+
+      '<div class="sg-date">'+fmtJalali(isoFromDate(new Date(s.createdAt)))+'</div>'+
+      '<div class="sg-actions">'+
+        '<button type="button" class="icon-btn btn-xs" onclick="confirmGlobalSubtaskEdit(\''+t.id+'\',\''+s.id+'\')" title="ذخیره">'+icon('check')+'</button>'+
+        '<button type="button" class="icon-btn btn-xs" onclick="cancelGlobalSubtaskEdit()" title="انصراف">'+icon('x')+'</button>'+
+      '</div>'+
+    '</div>';
+  }
+  return '<div class="subtask-row'+(s.done?' done':'')+'" data-sub-id="'+s.id+'">'+
+    '<div class="drag-handle" title="برای تغییر ترتیب بکشید" onpointerdown="startSubtaskDrag(event,\''+s.id+'\')">'+icon('grip')+'</div>'+
+    '<div class="subtask-check'+(s.done?' checked':'')+'" onclick="toggleGlobalSubtask(\''+t.id+'\',\''+s.id+'\')" title="انجام‌شده/نشده">'+(s.done?icon('check'):'')+'</div>'+
+    '<div class="sg-text">'+escapeHtml(s.text)+'</div>'+
+    '<div class="sg-parent" onclick="openTaskModal(\''+t.id+'\')" title="باز کردن تسک">'+escapeHtml(t.title)+(lead?' · '+escapeHtml(lead.name):'')+'</div>'+
+    '<div class="sg-date">'+fmtJalali(isoFromDate(new Date(s.createdAt)))+'</div>'+
+    '<div class="sg-actions">'+
+      '<button type="button" class="icon-btn btn-xs" onclick="startGlobalSubtaskEdit(\''+s.id+'\')" title="ویرایش">'+icon('edit')+'</button>'+
+      '<button type="button" class="icon-btn btn-xs" onclick="confirmDeleteGlobalSubtask(\''+t.id+'\',\''+s.id+'\')" title="حذف">'+icon('trash')+'</button>'+
+    '</div>'+
+  '</div>';
+}
+function renderSubtasksView(){
+  var root=document.getElementById('view-root');
+  ensureSubtaskOrderConsistent();
+  var orderIndex={};
+  state.subtaskOrder.forEach(function(id,i){orderIndex[id]=i;});
+  var all=getAllSubtasksFlat();
+  var list=all.filter(function(item){
+    if(subtasksFilter.status==='open' && item.sub.done)return false;
+    if(subtasksFilter.status==='done' && !item.sub.done)return false;
+    if(subtasksFilter.q){
+      var q=subtasksFilter.q.toLowerCase();
+      if((item.sub.text+' '+item.task.title).toLowerCase().indexOf(q)===-1)return false;
+    }
+    return true;
+  }).sort(function(a,b){
+    var ai=orderIndex.hasOwnProperty(a.sub.id)?orderIndex[a.sub.id]:Infinity;
+    var bi=orderIndex.hasOwnProperty(b.sub.id)?orderIndex[b.sub.id]:Infinity;
+    return ai-bi;
+  });
+
+  var totalAll=all.length;
+  var doneAll=all.filter(function(x){return x.sub.done;}).length;
+
+  root.innerHTML=
+    '<div class="filterbar">'+
+      '<input type="text" id="subtasksSearchBox" placeholder="جست‌وجو در متن ریزکارها یا عنوان تسک..." value="'+escapeHtml(subtasksFilter.q)+'" oninput="handleSubtasksSearchInput(this)">'+
+      '<select onchange="subtasksFilter.status=this.value;renderSubtasksView();">'+
+        '<option value="all"'+(subtasksFilter.status==='all'?' selected':'')+'>همه</option>'+
+        '<option value="open"'+(subtasksFilter.status==='open'?' selected':'')+'>انجام‌نشده</option>'+
+        '<option value="done"'+(subtasksFilter.status==='done'?' selected':'')+'>انجام‌شده</option>'+
+      '</select>'+
+      '<div style="flex:1"></div>'+
+      '<span class="hint">'+(totalAll?pd(doneAll)+' از '+pd(totalAll)+' انجام‌شده':'')+'</span>'+
+      '<button class="btn btn-sm" onclick="exportSubtasksExcel()" title="دانلود اکسل">'+icon('download')+'اکسل</button>'+
+      '<button class="btn btn-sm" onclick="document.getElementById(\'subtasksExcelInput\').click()" title="آپلود اکسل">'+icon('upload')+'اکسل</button>'+
+      '<input type="file" id="subtasksExcelInput" accept=".xlsx,.xls" class="hidden" onchange="importSubtasksExcel(this)">'+
+    '</div>'+
+    (totalAll?'<div class="hint" style="margin-bottom:10px;display:flex;align-items:center;gap:6px"><span class="hint-icon">'+icon('grip')+'</span>با دستگیرهٔ کنار هر ردیف، آن را بکشید تا ترتیب اولویت را خودتان مشخص کنید — بالاترین ردیف مهم‌ترین است.</div>':'')+
+    (list.length?'<div class="subtask-table">'+subtaskTableHead()+list.map(renderGlobalSubtaskRow).join('')+'</div>'
+      : totalAll
+        ? '<div class="empty-state">'+wrapIcon('search')+'<h3>موردی یافت نشد</h3><p>فیلتر یا جست‌وجو را تغییر دهید.</p></div>'
+        : '<div class="empty-state">'+wrapIcon('checklist')+'<h3>هنوز ریزکاری ثبت نشده</h3><p>از داخل هر تسک می‌توانید ریزکار اضافه کنید؛ همهٔ آن‌ها این‌جا هم نمایش داده می‌شوند.</p></div>');
+}
+function handleSubtasksSearchInput(el){
+  var pos=el.selectionStart;
+  subtasksFilter.q=el.value;
+  renderSubtasksView();
+  var ni=document.getElementById('subtasksSearchBox');
+  if(ni){ni.focus();try{ni.setSelectionRange(pos,pos);}catch(e){}}
+}
+function toggleGlobalSubtask(taskId,subId){
+  var t=taskById(taskId); if(!t)return;
+  var s=(t.subtasks||[]).find(function(x){return x.id===subId;});
+  if(!s)return;
+  s.done=!s.done;
+  persist(); renderCurrentSoft();
+}
+function startGlobalSubtaskEdit(subId){
+  editingGlobalSubtask=subId;
+  renderCurrentSoft();
+  var el=document.getElementById('gSubtaskEditInput_'+subId);
+  if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);}
+}
+function confirmGlobalSubtaskEdit(taskId,subId){
+  var input=document.getElementById('gSubtaskEditInput_'+subId);
+  if(!input)return;
+  var val=input.value.trim();
+  if(!val){toast('متن ریزکار نمی‌تواند خالی باشد.','error');return;}
+  var t=taskById(taskId); if(!t)return;
+  var s=(t.subtasks||[]).find(function(x){return x.id===subId;});
+  if(s)s.text=val;
+  editingGlobalSubtask=null;
+  persist(); renderCurrentSoft();
+}
+function cancelGlobalSubtaskEdit(){
+  editingGlobalSubtask=null;
+  renderCurrentSoft();
+}
+function handleGlobalSubtaskEditKey(e,taskId,subId){
+  if(e.key==='Enter'){e.preventDefault();confirmGlobalSubtaskEdit(taskId,subId);}
+  else if(e.key==='Escape'){e.preventDefault();cancelGlobalSubtaskEdit();}
+}
+function deleteGlobalSubtask(taskId,subId){
+  var t=taskById(taskId); if(!t)return;
+  t.subtasks=(t.subtasks||[]).filter(function(x){return x.id!==subId;});
+  persist(); renderCurrentSoft();
+}
+function confirmDeleteGlobalSubtask(taskId,subId){
+  openConfirm('حذف ریزکار','این مورد برای همیشه حذف می‌شود. ادامه می‌دهید؟',function(){deleteGlobalSubtask(taskId,subId);toast('ریزکار حذف شد.','success');});
+}
+
+function submitTaskForm(id){
+  var title=document.getElementById('fTaskTitle').value.trim();
+  if(!title){toast('عنوان تسک الزامی است.','error');return;}
+  var jy=Number(document.getElementById('fTaskYear').value);
+  var jm=Number(document.getElementById('fTaskMonth').value);
+  var jd=Number(document.getElementById('fTaskDay').value);
+  var data={
+    title:title,
+    leadId:document.getElementById('fTaskLead').value||null,
+    product:document.getElementById('fTaskProduct').value,
+    priority:document.getElementById('fTaskPriority').value,
+    status:document.getElementById('fTaskStatus').value,
+    dueDateISO:jalaliToIso(jy,jm,jd),
+    dueTime:document.getElementById('fTaskTime').value||'',
+    reminderMinutes:Number(document.getElementById('fTaskReminder').value),
+    description:document.getElementById('fTaskDesc').value.trim(),
+    subtasks:taskModalSubtasks.slice()
+  };
+  if(id){updateTask(id,data);toast('تسک به‌روزرسانی شد.','success');}
+  else{addTask(data);toast('تسک اضافه شد.','success');}
+  closeModal(); renderCurrentSoft(); renderBell();
+}
+
+/* ======================================================================
+   INIT
+   ====================================================================== */
+function updateTodayPill(){
+  document.getElementById('todayPill').textContent=fmtJalaliLong(isoToday());
+}
+function init(){
+  renderNav();
+  updateTodayPill();
+  navigate('dashboard');
+  renderBell();
+  saveSidebarFoot();
+  setInterval(updateTodayPill,60000);
+  setInterval(renderBell,60000);
+  setInterval(function(){ if(currentView==='dashboard')renderDashboard(); },60000);
+  checkReminders();
+  maybeShowBackupPrompt();
+}
+function maybeShowBackupPrompt(){
+  if(!hasFSA)return;
+  if(backupHandle)return;
+  var root=document.getElementById('modal-root');
+  root.innerHTML='<div class="modal-backdrop" onclick="if(event.target===this)dismissBackupPrompt()">'+
+    '<div class="modal modal-sm">'+
+      '<div class="modal-head"><h3>اتصال به فایل بکاپ</h3></div>'+
+      '<div class="modal-body">'+
+        '<p style="margin:0 0 4px;font-size:13.5px;color:var(--text-muted);line-height:1.8">'+
+          'به دلیل تنظیمات امنیتی مرورگرها، هیچ صفحه‌ای — حتی همین برنامه — نمی‌تواند بدون یک کلیک از طرف شما به فایل روی سیستم‌تان دسترسی نوشتن پیدا کند؛ این محدودیت مرورگر است، نه محدودیت برنامه. برای همین هر بار که این فایل را باز می‌کنید، کافی‌ست یک‌بار فایل بکاپ قبلی را انتخاب کنید تا اطلاعات بازیابی شود و ذخیرهٔ خودکار روی همان فایل ادامه پیدا کند.'+
+        '</p>'+
+      '</div>'+
+      '<div class="modal-foot" style="flex-direction:column;gap:8px;align-items:stretch">'+
+        '<button class="btn btn-primary" style="justify-content:center" onclick="openExistingBackupFile()">'+icon('upload')+'انتخاب فایل بکاپ و ادامهٔ ذخیرهٔ خودکار</button>'+
+        '<button class="btn btn-ghost btn-sm" style="justify-content:center" onclick="dismissBackupPrompt()">فعلاً بدون بکاپ ادامه بده</button>'+
+      '</div>'+
+    '</div></div>';
+}
+function dismissBackupPrompt(){closeModal();}
+window.addEventListener('DOMContentLoaded',init);
+window.addEventListener('beforeunload',function(e){
+  if(!backupHandle && (state.leads.length || state.tasks.length)){
+    e.preventDefault(); e.returnValue='';
+  }
+});
+</script>
+</body>
+</html>
